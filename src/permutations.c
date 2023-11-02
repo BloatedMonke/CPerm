@@ -1,3 +1,4 @@
+#include "permutations.h"
 #include "combinatorics.h"
 
 void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth], int loopLength[loopDepth], int arr[], int perm[]);

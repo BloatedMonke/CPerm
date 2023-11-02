@@ -1,3 +1,5 @@
+#include "combinatorics.h"
+
 int choose(int n, int k)
 {
     return flooredFact(n, k) / fact(k);
