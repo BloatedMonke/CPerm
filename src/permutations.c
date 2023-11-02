@@ -1,11 +1,15 @@
+#include <stdlib.h>
 #include "permutations.h"
 #include "combinatorics.h"
 
 void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth], int loopLength[loopDepth], int arr[], int perm[]);
 
 
-void *nCkperm(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
+void *nCkperm(char *collection, uint64_t n, uint64_t k, uint64_t objsize);
 {
+    // manipulate objs 1 byte at a time
+    char *perm = malloc(k * objsize * choose(n, k));
+
     int counters[k], loopLength[k], iter = 0, pN = 0;
     for (int i = 1; i <= k; ++i)
     {
