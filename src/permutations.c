@@ -7,14 +7,14 @@ void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth],
 
 void *nCkperm(char *collection, uint64_t n, uint64_t k, uint64_t objsize);
 {
-    // manipulate objs 1 byte at a time
+    // char * enables manipulation of objs
     char *perm = malloc(k * objsize * choose(n, k));
 
     int counters[k], loopLength[k], iter = 0, pN = 0;
-    for (int i = 1; i <= k; ++i)
+    for (int i = 0; i < k; ++i)
     {
-        counters[i - 1] = i - 1;
-        loopLength[i - 1] = n - k + i;
+        counters[i] = i;
+        loopLength[i] = n - k + i + 1;
     }
 
     enumerate(&pN, iter, k, counters, loopLength, arr, perm);
