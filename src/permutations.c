@@ -2,37 +2,37 @@
 #include "permutations.h"
 #include "combinatorics.h"
 
-void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth], int loopLength[loopDepth], int arr[], int perm[]);
+void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth], int loopLength[loopDepth], byte *arr, byte *perm);
 
 
-void *nCkperm(char *collection, uint64_t n, uint64_t k, uint64_t objsize);
+void *nCkperm(byte *collection, uint64_t n, uint64_t k, uint64_t objsize);
 {
-    // char * enables manipulation of objs
-    char *perm = malloc(k * objsize * choose(n, k));
+    // byte * enables manipulation of objs
+    byte *perm = malloc(k * objsize * choose(n, k));
 
-    int counters[k], loopLength[k], iter = 0, pN = 0;
+    int counters[k], loopLength[k], pN = 0;
     for (int i = 0; i < k; ++i)
     {
         counters[i] = i;
         loopLength[i] = n - k + i + 1;
     }
 
-    enumerate(&pN, iter, k, counters, loopLength, arr, perm);
+    enumerate(&pN, 0, k, counters, loopLength, arr, perm);
 
     return perm;
 }
 
-void swap(int *pN, int loopDepth, int counters[], int arr[], int perm[])
+void swap(int *pN, int loopDepth, int counters[], byte *collection, byte *perm, uint64_t objsize)
 {
     for (int iter = 0; iter < loopDepth; ++iter)
     {
-        perm[*pN * loopDepth + iter] = arr[counters[iter]];
+        memcpy(perm + (*pN * loopDepth + iter) * objsize, collection + counters[iter] * objsize, objsize);
     }
     ++*pN;
 }
 
 // automating for loops with recursion
-void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth], int loopLength[loopDepth], int arr[], int perm[])
+void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth], int loopLength[loopDepth], byte *arr, byte *perm)
 {
     if (currentIter == loopDepth)
     {

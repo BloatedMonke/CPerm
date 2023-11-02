@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include "combinatorics.h"
 
+/* a more fitting name for the operation */
+typedef int8_t byte;
+
 /* all of these functions will allocate memory for a new 
  * container of size (width * sizeof(object)) * (height) =
  * (k * objsize) * P(n, k) where P denotes the standard
