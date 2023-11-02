@@ -9,10 +9,9 @@ int main(void){
     int n = sizeof(test) / sizeof(*test);
     int k = 3;
     int nCk = choose(n, k);
-    int perm[k * nCk];
-    int *ret = nCkperm(n, k, test, perm);
-
+    int *ret = nCkperm(test, n, k, sizeof(*test));
     printPerm(ret, nCk, k);
+    return 0;
 }
 
 void printPerm(int *arr, int nCk, int k){
