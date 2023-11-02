@@ -22,10 +22,10 @@
  * [1,2,3] would be shown rather over [3,2,1] whereas
  * for nCkperm([3,4,2,1], 4, 3) [3,2,1] would be shown.
  */
-void nCkperm(void *collection, uint64_t n, uint64_t k);
+void *nCkperm(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
 
-void cyclicperm(void *collection, uint64_t n, uint64_t k);
+void *cyclicperm(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
 
-void permutations(void *collection, uint64_t n, uint64_t k);
+void *permutations(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
 
 #endif /* _PERMUTATIONS_H_ */

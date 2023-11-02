@@ -4,7 +4,7 @@
 void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth], int loopLength[loopDepth], int arr[], int perm[]);
 
 
-int *nCkperm(int n, int k, int arr[n], int perm[k * choose(n, k)])
+void *nCkperm(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
 {
     int counters[k], loopLength[k], iter = 0, pN = 0;
     for (int i = 1; i <= k; ++i)
