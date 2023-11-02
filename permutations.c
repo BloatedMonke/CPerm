@@ -1,3 +1,8 @@
+#include "combinatorics.h"
+
+void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth], int loopLength[loopDepth], int arr[], int perm[]);
+
+
 int *nCkperm(int n, int k, int arr[n], int perm[k * choose(n, k)])
 {
     int counters[k], loopLength[k], iter = 0, pN = 0;
@@ -38,31 +43,4 @@ void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth],
         enumerate(pN, currentIter + 1, loopDepth, counters, loopLength, arr, perm);
 
     return;
-}
-
-int choose(int n, int k)
-{
-    return flooredFact(n, k) / fact(k);
-}
-
-int flooredFact(int n, int k)
-{
-    if (k == 0) return 1;
-    int p = 1;
-    for (int i = n - k + 1; i < n; ++i)
-    {
-        p *= i;
-    }
-    return n * p;
-}
-
-int fact(int n)
-{
-    if (n == 0) return 1;
-    int p = 1;
-    for (int i = 2; i < n; ++i)
-    {
-        p *= i;
-    }
-    return n * p;
 }
