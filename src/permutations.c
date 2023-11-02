@@ -1,11 +1,12 @@
 #include <stdlib.h>
+#include <string.h>
 #include "permutations.h"
 #include "combinatorics.h"
 
-void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth], int loopLength[loopDepth], byte *arr, byte *perm);
+void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth], int loopLength[loopDepth], byte *arr, byte *perm, uint64_t objsize);
 
 
-void *nCkperm(byte *collection, uint64_t n, uint64_t k, uint64_t objsize);
+void *nCkperm(void *collection, uint64_t n, uint64_t k, uint64_t objsize)
 {
     // byte * enables manipulation of objs
     byte *perm = malloc(k * objsize * choose(n, k));
@@ -17,7 +18,7 @@ void *nCkperm(byte *collection, uint64_t n, uint64_t k, uint64_t objsize);
         loopLength[i] = n - k + i + 1;
     }
 
-    enumerate(&pN, 0, k, counters, loopLength, arr, perm);
+    enumerate(&pN, 0, k, counters, loopLength, collection, perm, objsize);
 
     return perm;
 }
@@ -32,11 +33,11 @@ void swap(int *pN, int loopDepth, int counters[], byte *collection, byte *perm, 
 }
 
 // automating for loops with recursion
-void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth], int loopLength[loopDepth], byte *arr, byte *perm)
+void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth], int loopLength[loopDepth], byte *arr, byte *perm, uint64_t objsize)
 {
     if (currentIter == loopDepth)
     {
-        swap(pN, loopDepth, counters, arr, perm);
+        swap(pN, loopDepth, counters, arr, perm, objsize);
         return;
     }
 
@@ -45,7 +46,7 @@ void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth],
          counters[currentIter] < loopLength[currentIter];
          ++counters[currentIter])
 
-        enumerate(pN, currentIter + 1, loopDepth, counters, loopLength, arr, perm);
+        enumerate(pN, currentIter + 1, loopDepth, counters, loopLength, arr, perm, objsize);
 
     return;
 }
