@@ -5,6 +5,12 @@ uint64_t choose(uint64_t n, uint64_t k)
     return flooredFact(n, k) / fact(k);
 }
 
+// TODO
+int64_t choose_e(int64_t n, uint64_t k)
+{
+    return -1;
+}
+
 uint64_t flooredFact(uint64_t n, uint64_t k)
 {
     if (k == 0) return 1;
