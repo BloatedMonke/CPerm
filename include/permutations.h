@@ -2,7 +2,6 @@
 #define _PERMUTATIONS_H_
 
 #include <stdint.h>
-#include "combinatorics.h"
 
 /* a more fitting name for the operation */
 typedef int8_t byte;
@@ -27,7 +26,7 @@ typedef int8_t byte;
  */
 void *nCkperm(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
 
-void *cyclicperm(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
+void *cycle(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
 
 void *permutations(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
 

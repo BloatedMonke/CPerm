@@ -11,6 +11,7 @@ void *nCkperm(void *collection, uint64_t n, uint64_t k, uint64_t objsize)
     // byte * enables manipulation of objs
     byte *perm = malloc(k * objsize * choose(n, k));
 
+    // setup loop variables for recursion
     int counters[k], loopLength[k], pN = 0;
     for (int i = 0; i < k; ++i)
     {
@@ -21,6 +22,18 @@ void *nCkperm(void *collection, uint64_t n, uint64_t k, uint64_t objsize)
     enumerate(&pN, 0, k, counters, loopLength, collection, perm, objsize);
 
     return perm;
+}
+
+// TODO
+void *cycle(void *collection, uint64_t n, uint64_t k, uint64_t objsize)
+{
+
+}
+
+// TODO
+void *permutations(void *collection, uint64_t n, uint64_t k, uint64_t objsize)
+{
+
 }
 
 void swap(int *pN, int loopDepth, int counters[], byte *collection, byte *perm, uint64_t objsize)
