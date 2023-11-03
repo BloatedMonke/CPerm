@@ -24,7 +24,7 @@ typedef int8_t byte;
  * [1,2,3] would be shown rather over [3,2,1] whereas
  * for nCkperm([3,4,2,1], 4, 3) [3,2,1] would be shown.
  */
-void *nCkperm(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
+void *nCkperm(void *collection, uint8_t n, uint8_t k, uint64_t objsize);
 
 void *cycle(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
 

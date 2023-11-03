@@ -1,3 +1,7 @@
+/* 20C10 gives a seg fault!
+ * not anymore!
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "combinatorics.h"
@@ -15,9 +19,10 @@ int main(void){
 
     printf("---------------------------\n");
 
-    char s[] = "ABCDEFGHIJKLMNOPQ";
+
+    char s[] = "ABCDEFGHIJKLMNOPQRST";
     int n2 = sizeof(s) / sizeof(*s) - 1;
-    int k2 = 3;
+    int k2 = 10;
     char *sT = nCkperm(s, n2, k2, sizeof(*s));
     void lambda2(void *x){printf("%c", *(char *)x);}
     printPerm(sT, choose(n2, k2), k2, sizeof(*sT), lambda2);
