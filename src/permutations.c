@@ -6,7 +6,7 @@
 void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth], int loopLength[loopDepth], byte *arr, byte *perm, uint64_t objsize);
 
 
-void *nCkperm(void *collection, uint64_t n, uint64_t k, uint64_t objsize)
+void *nCkperm(void *collection, uint8_t n, uint8_t k, uint64_t objsize)
 {
     // byte * enables manipulation of objs
     byte *perm = malloc(k * objsize * choose(n, k));
@@ -55,7 +55,7 @@ void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth],
     }
 
     // set counters to their new state and continue the loop
-    for (counters[currentIter] = (counters[currentIter - 1] + 1) * (currentIter > 0);
+    for (counters[currentIter] = (counters[currentIter - 1 * (currentIter > 0)] + 1) * (currentIter > 0);
          counters[currentIter] < loopLength[currentIter];
          ++counters[currentIter])
 

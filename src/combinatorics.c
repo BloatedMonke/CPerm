@@ -14,8 +14,8 @@ int64_t choose_e(int64_t n, uint64_t k)
 uint64_t flooredFact(uint64_t n, uint64_t k)
 {
     if (k == 0) return 1;
-    int p = 1;
-    for (int i = n - k + 1; i < n; ++i)
+    uint64_t p = 1;
+    for (uint8_t i = n - k + 1; i < n; ++i)
     {
         p *= i;
     }
@@ -25,8 +25,8 @@ uint64_t flooredFact(uint64_t n, uint64_t k)
 uint64_t fact(uint64_t n)
 {
     if (n == 0) return 1;
-    int p = 1;
-    for (int i = 2; i < n; ++i)
+    uint64_t p = 1;
+    for (uint8_t i = 2; i < n; ++i)
     {
         p *= i;
     }
