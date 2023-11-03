@@ -1,11 +1,17 @@
 #include "combinatorics.h"
 
-int choose(int n, int k)
+uint64_t choose(uint64_t n, uint64_t k)
 {
     return flooredFact(n, k) / fact(k);
 }
 
-int flooredFact(int n, int k)
+// TODO
+int64_t choose_e(int64_t n, uint64_t k)
+{
+    return -1;
+}
+
+uint64_t flooredFact(uint64_t n, uint64_t k)
 {
     if (k == 0) return 1;
     int p = 1;
@@ -16,7 +22,7 @@ int flooredFact(int n, int k)
     return n * p;
 }
 
-int fact(int n)
+uint64_t fact(uint64_t n)
 {
     if (n == 0) return 1;
     int p = 1;
