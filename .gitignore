@@ -1,0 +1,13 @@
+# object files
+*.o
+
+# libraries
+*.so
+
+# my own debug files
+db*
+
+# executables
+*.exe
+*.out
+main

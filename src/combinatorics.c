@@ -8,7 +8,9 @@ uint64_t choose(uint64_t n, uint64_t k)
 // TODO
 int64_t choose_e(int64_t n, uint64_t k)
 {
-    return -1;
+    // PHONY:
+    return n * k;
+    // END PHONY
 }
 
 uint64_t flooredFact(uint64_t n, uint64_t k)

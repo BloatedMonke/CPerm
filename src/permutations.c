@@ -27,13 +27,19 @@ void *nCkperm(void *collection, uint8_t n, uint8_t k, uint64_t objsize)
 // TODO
 void *cycle(void *collection, uint64_t n, uint64_t k, uint64_t objsize)
 {
-
+    // PHONY:
+    n += k * objsize;
+    return collection;
+    // END PHONY
 }
 
 // TODO
 void *permutations(void *collection, uint64_t n, uint64_t k, uint64_t objsize)
 {
-
+    // PHONY:
+    n += k * objsize;
+    return collection;
+    // END PHONY
 }
 
 void swap(int *pN, int loopDepth, int counters[], byte *collection, byte *perm, uint64_t objsize)
