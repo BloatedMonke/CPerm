@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "permutations.h"
-#include "combinatorics.h"
 
 void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth], int loopLength[loopDepth], byte *arr, byte *perm, uint64_t objsize);
 

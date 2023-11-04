@@ -30,4 +30,7 @@ void *cycle(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
 
 void *permutations(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
 
+/* include here so users don't have to */
+#include "combinatorics.h"
+
 #endif /* _PERMUTATIONS_H_ */
