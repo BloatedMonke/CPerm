@@ -2,31 +2,48 @@
 #include <string.h>
 #include "permutations.h"
 
-void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth], int loopLength[loopDepth], byte *arr, byte *perm, uint64_t objsize);
+void swap(int *rowN, int k, int counters[], byte *collection, byte *perm, uint64_t objsize)
+{
+    for (int iter = 0; iter < k; ++iter)
+    {
+        memcpy(perm + (*rowN * k + iter) * objsize, collection + counters[iter] * objsize, objsize);
+    }
+    ++*rowN;
+}
 
-/* could return a struct that has size information instead ? 
- * then have users loop through the struct using e.g.
- * char *x = permStruct.objArr
- * for (int i = 0; i < permStruct.height; ++i){
-    for (int j = 0; j < permStruct.width; ++j)
-     do something...
- }
- * then i could keep comb and perm separate (as would be preferred).
- */
+// automating for loops with recursion
+void enumerate(int *rowN, int ijk, int k, int counters[k], int ijk_ends[k], byte *arr, byte *perm, uint64_t objsize)
+{
+    if (ijk == k)
+    {
+        swap(rowN, k, counters, arr, perm, objsize);
+        return;
+    }
+
+    // set counters to their new state and continue the loop
+    for (counters[ijk] = (counters[ijk - 1 * (ijk > 0)] + 1) * (ijk > 0);
+         counters[ijk] < ijk_ends[ijk];
+         ++counters[ijk])
+
+        enumerate(rowN, ijk + 1, k, counters, ijk_ends, arr, perm, objsize);
+
+    return;
+}
+
 void *nCkperm(void *collection, uint8_t n, uint8_t k, uint64_t objsize)
 {
     // byte * enables manipulation of objs
     byte *perm = malloc(k * objsize * choose(n, k));
 
     // setup loop variables for recursion
-    int counters[k], loopLength[k], pN = 0;
+    int counters[k], ijk_ends[k], rowN = 0;
     for (int i = 0; i < k; ++i)
     {
         counters[i] = i;
-        loopLength[i] = n - k + i + 1;
+        ijk_ends[i] = n - k + i + 1;
     }
 
-    enumerate(&pN, 0, k, counters, loopLength, collection, perm, objsize);
+    enumerate(&rowN, 0, k, counters, ijk_ends, collection, perm, objsize);
 
     return perm;
 }
@@ -47,32 +64,4 @@ void *permutations(void *collection, uint64_t n, uint64_t k, uint64_t objsize)
     n += k * objsize;
     return collection;
     // END PHONY
-}
-
-void swap(int *pN, int k, int counters[], byte *collection, byte *perm, uint64_t objsize)
-{
-    for (int iter = 0; iter < k; ++iter)
-    {
-        memcpy(perm + (*pN * k + iter) * objsize, collection + counters[iter] * objsize, objsize);
-    }
-    ++*pN;
-}
-
-// automating for loops with recursion
-void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth], int loopLength[loopDepth], byte *arr, byte *perm, uint64_t objsize)
-{
-    if (currentIter == loopDepth)
-    {
-        swap(pN, loopDepth, counters, arr, perm, objsize);
-        return;
-    }
-
-    // set counters to their new state and continue the loop
-    for (counters[currentIter] = (counters[currentIter - 1 * (currentIter > 0)] + 1) * (currentIter > 0);
-         counters[currentIter] < loopLength[currentIter];
-         ++counters[currentIter])
-
-        enumerate(pN, currentIter + 1, loopDepth, counters, loopLength, arr, perm, objsize);
-
-    return;
 }
