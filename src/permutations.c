@@ -4,7 +4,15 @@
 
 void enumerate(int *pN, int currentIter, int loopDepth, int counters[loopDepth], int loopLength[loopDepth], byte *arr, byte *perm, uint64_t objsize);
 
-
+/* could return a struct that has size information instead ? 
+ * then have users loop through the struct using e.g.
+ * char *x = permStruct.objArr
+ * for (int i = 0; i < permStruct.height; ++i){
+    for (int j = 0; j < permStruct.width; ++j)
+     do something...
+ }
+ * then i could keep comb and perm separate (as would be preferred).
+ */
 void *nCkperm(void *collection, uint8_t n, uint8_t k, uint64_t objsize)
 {
     // byte * enables manipulation of objs
@@ -41,11 +49,11 @@ void *permutations(void *collection, uint64_t n, uint64_t k, uint64_t objsize)
     // END PHONY
 }
 
-void swap(int *pN, int loopDepth, int counters[], byte *collection, byte *perm, uint64_t objsize)
+void swap(int *pN, int k, int counters[], byte *collection, byte *perm, uint64_t objsize)
 {
-    for (int iter = 0; iter < loopDepth; ++iter)
+    for (int iter = 0; iter < k; ++iter)
     {
-        memcpy(perm + (*pN * loopDepth + iter) * objsize, collection + counters[iter] * objsize, objsize);
+        memcpy(perm + (*pN * k + iter) * objsize, collection + counters[iter] * objsize, objsize);
     }
     ++*pN;
 }
