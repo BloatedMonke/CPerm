@@ -26,8 +26,10 @@ typedef int8_t byte;
  */
 void *nCkperm(void *collection, uint8_t n, uint8_t k, uint64_t objsize);
 
+/**/
 void *cycle(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
 
+/**/
 void *permutations(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
 
 /* include here so users don't have to */
