@@ -1,6 +1,33 @@
 #include <stdlib.h>
 #include <string.h>
 #include "permutations.h"
+#include "combinatorics.h"
+
+struct perm
+{
+    void *collection;
+    uint64_t height;
+    uint8_t width;
+    uint32_t objsize;
+};
+typedef struct perm
+perm;
+
+permptr birth_perm(uint64_t height, uint8_t width, uint32_t objsize)
+{
+    permptr new = malloc(sizeof(perm));
+    new->collection = (void *)0;
+    new->height = height;
+    new->width = width;
+    new->objsize = objsize;
+    return new;
+}
+
+void kill_perm(permptr p)
+{
+    free(p->collection);
+    free(p);
+}
 
 void swap(int *rowN, int k, int counters[], byte *collection, byte *perm, uint64_t objsize)
 {
@@ -30,10 +57,13 @@ void enumerate(int *rowN, int ijk, int k, int counters[k], int ijk_ends[k], byte
     return;
 }
 
-void *nCkperm(void *collection, uint8_t n, uint8_t k, uint64_t objsize)
+permptr nCkperm(void *collection, uint8_t n, uint8_t k, uint64_t objsize)
 {
+    uint64_t height = choose(n, k);
+    permptr group = birth_perm(height, k, objsize);
+    
     // byte * enables manipulation of objs
-    byte *perm = malloc(k * objsize * choose(n, k));
+    byte *perm = malloc(height * k * objsize);
 
     // setup loop variables for recursion
     int counters[k], ijk_ends[k], rowN = 0;
@@ -45,7 +75,9 @@ void *nCkperm(void *collection, uint8_t n, uint8_t k, uint64_t objsize)
 
     enumerate(&rowN, 0, k, counters, ijk_ends, collection, perm, objsize);
 
-    return perm;
+    group->collection = perm;
+
+    return group;
 }
 
 // TODO
@@ -58,10 +90,29 @@ void *cycle(void *collection, uint64_t n, uint64_t k, uint64_t objsize)
 }
 
 // TODO
-void *permutations(void *collection, uint64_t n, uint64_t k, uint64_t objsize)
+permptr permutations(void *collection, uint64_t n, uint64_t k, uint64_t objsize)
 {
     // PHONY:
     n += k * objsize;
     return collection;
     // END PHONY
+}
+
+/* =====================================================
+ * utility funcs
+ ==================================================== */
+
+#include <stdio.h>
+
+void printPerm(permptr group, void (*prettyPrint)(void *)){
+    printf("[\n");
+    for (int i = 0; i < group->height; ++i){
+        printf("[");
+        for (int j =0; j < group->width; ++j){
+            prettyPrint( (void *)&((byte *)group->collection)[ (i * group->width + j) * group->objsize] );
+            printf("%s", j < group->width - 1 ? ", ": "");
+        }
+        printf("]%s\n", i < group->height - 1 ? ",": "");
+    }
+    printf("]\n");
 }

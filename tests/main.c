@@ -1,45 +1,29 @@
-/* 20C10 gives a seg fault!
- * not anymore!
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "permutations.h"
 
-void printPerm(void *arr, int nCk, int k, int objsize, void (*prettyPrint)(void *));
+#define countof(x) (sizeof(x) / sizeof(*(x)))
+#define lengthof(s) (countof(s) - 1)
 
 int main(void){
     int test[] = {1,2,3,4,5,6};
-    int n = sizeof(test) / sizeof(*test);
     int k = 3;
-    int *ret = nCkperm(test, n, k, sizeof(*test));
+    permptr ret = nCkperm(test, countof(test), k, sizeof(*test));
+    
     void lambda(void *x){printf("%d", *(int *)x);}
-    printPerm(ret, choose(n, k), k, sizeof(*test), lambda);
+    printPerm(ret, lambda);
 
     printf("---------------------------\n");
 
 
     char s[] = "ABCDEFGHIJKLMNOPQRST";
-    int n2 = sizeof(s) / sizeof(*s) - 1;
     int k2 = 10;
-    char *sT = nCkperm(s, n2, k2, sizeof(*s));
+    permptr sT = nCkperm(s, lengthof(s), k2, sizeof(*s));
+    
     void lambda2(void *x){printf("%c", *(char *)x);}
-    printPerm(sT, choose(n2, k2), k2, sizeof(*sT), lambda2);
+    printPerm(sT, lambda2);
 
-    free(ret);
-    free(sT);
+    kill_perm(ret);
+    kill_perm(sT);
     return 0;
-}
-
-void printPerm(void *arr, int nCk, int k, int objsize, void (*prettyPrint)(void *)){
-    printf("[\n");
-    for (int i = 0; i < nCk; ++i){
-        printf("[");
-        for (int j =0; j < k; ++j){
-            prettyPrint( (void *)&((byte *)arr)[(i * k + j) * objsize] );
-            printf("%s", j < k - 1 ? ", ": "");
-        }
-        printf("]%s\n", i < nCk - 1 ? ",": "");
-    }
-    printf("]\n");
 }
