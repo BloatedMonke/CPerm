@@ -30,11 +30,11 @@ perm;
  *
  * The ordering takes first encountered elements
  * to be of higher priority. i.e. from the example
- * above if the call was nCKperm([1,2,3,4], 4, 3)
+ * above if the call was combinations([1,2,3,4], 4, 3)
  * [1,2,3] would be shown rather over [3,2,1] whereas
- * for nCkperm([3,4,2,1], 4, 3) [3,2,1] would be shown.
+ * for combinations([3,4,2,1], 4, 3) [3,2,1] would be shown.
  */
-perm nCkperm(void *collection, uint8_t n, uint8_t k, uint64_t objsize);
+perm combinations(void *collection, uint8_t n, uint8_t k, uint64_t objsize);
 
 /**/
 void *cycle(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
