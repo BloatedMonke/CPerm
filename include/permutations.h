@@ -4,11 +4,17 @@
 #include <stdint.h>
 
 /* a more fitting name for the operation */
-typedef int8_t byte;
+typedef uint8_t byte;
 
-/* users should interact w/ the group through the api
- * functions */
-typedef struct perm *permptr;
+struct perm
+{
+    void *collection;
+    uint64_t height;
+    uint8_t width;
+    uint32_t objsize;
+};
+typedef struct perm
+perm;
 
 /* all of these functions will allocate memory for a new 
  * container of size (width * sizeof(object)) * (height) =
@@ -17,9 +23,6 @@ typedef struct perm *permptr;
  *
  * These must be freed by the caller.
  */
-
-/**/
-void kill_perm(permptr p);
 
 /* permutes the array such that both the elements
  * and the ordering are unique. i.e. only one of
@@ -31,15 +34,15 @@ void kill_perm(permptr p);
  * [1,2,3] would be shown rather over [3,2,1] whereas
  * for nCkperm([3,4,2,1], 4, 3) [3,2,1] would be shown.
  */
-permptr nCkperm(void *collection, uint8_t n, uint8_t k, uint64_t objsize);
+perm nCkperm(void *collection, uint8_t n, uint8_t k, uint64_t objsize);
 
 /**/
 void *cycle(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
 
 /**/
-permptr permutations(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
+perm permutations(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
 
 /**/
-void printPerm(permptr group, void (*prettyPrint)(void *));
+void printPerm(perm group, void (*prettyPrint)(void *));
 
 #endif /* _PERMUTATIONS_H_ */
