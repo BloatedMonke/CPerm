@@ -3,12 +3,17 @@
 
 #include <stdint.h>
 
+#define   perm_group(P) ((P).group)
+#define   perm_width(P) ((P).width)
+#define  perm_height(P) ((P).height)
+#define perm_objsize(P) ((P).objsize)
+
 /* a more fitting name for the operation */
 typedef uint8_t byte;
 
 struct perm
 {
-    void *collection;
+    void *group;
     uint64_t height;
     uint8_t width;
     uint32_t objsize;
@@ -41,6 +46,9 @@ void *cycle(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
 
 /**/
 perm permutations(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
+
+/**/
+void perm_kill(perm);
 
 /**/
 void printPerm(perm group, void (*prettyPrint)(void *));

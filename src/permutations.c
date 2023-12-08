@@ -3,7 +3,11 @@
 #include "permutations.h"
 #include "combinatorics.h"
 
-void swap(int *rowN, int k, int counters[], byte *collection, byte *perm, uint64_t objsize)
+void perm_kill(perm A){
+    free(perm_group(A));
+}
+
+void swap(int * restrict rowN, int k, int counters[], byte * restrict collection, byte * restrict perm, uint64_t objsize)
 {
     for (int iter = 0; iter < k; ++iter)
     {
@@ -12,8 +16,8 @@ void swap(int *rowN, int k, int counters[], byte *collection, byte *perm, uint64
     ++*rowN;
 }
 
-// automating for loops with recursion
-void enumerate(int *rowN, int ijk, int k, int counters[k], int ijk_ends[k], byte *arr, byte *perm, uint64_t objsize)
+/* automating for loops with recursion */
+void enumerate(int * restrict rowN, int ijk, int k, int counters[k], int ijk_ends[k], byte * restrict arr, byte * restrict perm, uint64_t objsize)
 {
     if (ijk == k)
     {
@@ -21,7 +25,7 @@ void enumerate(int *rowN, int ijk, int k, int counters[k], int ijk_ends[k], byte
         return;
     }
 
-    // set counters to their new state and continue the loop
+    /** set counters to their new state and continue the loop */
     for (counters[ijk] = (counters[ijk - 1 * (ijk > 0)] + 1) * (ijk > 0);
          counters[ijk] < ijk_ends[ijk];
          ++counters[ijk])
@@ -35,10 +39,9 @@ perm combinations(void *collection, uint8_t n, uint8_t k, uint64_t objsize)
 {
     uint64_t height = choose(n, k);
     
-    // byte * enables manipulation of objs
     byte *group = malloc(height * k * objsize);
 
-    // setup loop variables for recursion
+    /** setup loop variables for recursion */
     int counters[k], ijk_ends[k], rowN = 0;
     for (int i = 0; i < k; ++i)
     {
@@ -48,7 +51,7 @@ perm combinations(void *collection, uint8_t n, uint8_t k, uint64_t objsize)
 
     enumerate(&rowN, 0, k, counters, ijk_ends, collection, group, objsize);
 
-    return (perm){.collection = group, .width = k, .height = height, .objsize = objsize};
+    return (perm){.group = group, .width = k, .height = height, .objsize = objsize};
 }
 
 // TODO
@@ -65,7 +68,7 @@ perm permutations(void *collection, uint64_t n, uint64_t k, uint64_t objsize)
 {
     // PHONY:
     n += k * objsize;
-    return (perm){.collection = collection};
+    return (perm){.group = collection};
     // END PHONY
 }
 
@@ -80,7 +83,7 @@ void printPerm(perm group, void (*prettyPrint)(void *)){
     for (uint i = 0; i < group.height; ++i){
         printf("[");
         for (uint j = 0; j < group.width; ++j){
-            prettyPrint( (void *)&((byte *)group.collection)[ (i * group.width + j) * group.objsize] );
+            prettyPrint( (void *)&((byte *)group.group)[ (i * group.width + j) * group.objsize] );
             printf("%s", j < group.width - 1u ? ", ": "");
         }
         printf("]%s\n", i < group.height - 1 ? ",": "");
