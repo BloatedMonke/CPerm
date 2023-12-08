@@ -31,7 +31,11 @@ void enumerate(int *rowN, int ijk, int k, int counters[k], int ijk_ends[k], byte
     return;
 }
 
+<<<<<<< HEAD
 perm nCkperm(void *collection, uint8_t n, uint8_t k, uint64_t objsize)
+=======
+perm combinations(void *collection, uint8_t n, uint8_t k, uint64_t objsize)
+>>>>>>> main
 {
     uint64_t height = choose(n, k);
     
