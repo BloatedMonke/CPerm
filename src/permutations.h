@@ -1,6 +1,7 @@
 #ifndef _PERMUTATIONS_H_
 #define _PERMUTATIONS_H_
 
+#include <stddef.h>
 #include <stdint.h>
 
 #define   perm_group(P) ((P).group)
@@ -8,49 +9,55 @@
 #define  perm_height(P) ((P).height)
 #define perm_objsize(P) ((P).objsize)
 
-/* a more fitting name for the operation */
-typedef uint8_t byte;
-
 struct perm
 {
-    void *group;
-    uint64_t height;
-    uint8_t width;
-    uint32_t objsize;
+    void*           group;
+    const uint64_t height;
+    const uint8_t   width;
+    const size_t  objsize;
 };
-typedef struct perm
-perm;
 
-/* all of these functions will allocate memory for a new 
- * container of size (width * sizeof(object)) * (height) =
- * (k * objsize) * P(n, k) where P denotes the standard
- * permute function for each permutation listed.
- *
- * These must be freed by the caller.
- */
+/*------------------------------------------------------------------
+ *  perm_init is to be called before any perm takes place. Any perm
+ * henceforth will assume that objsize until perm_init is called
+ * again with a new objsize
+ *----------------------------------------------------------------*/
+void perm_init(size_t objsize);
 
-/* permutes the array such that both the elements
- * and the ordering are unique. i.e. only one of
- * either [1,2,3] or [3,2,1] will exist.
- *
- * The ordering takes first encountered elements
- * to be of higher priority. i.e. from the example
- * above if the call was combinations([1,2,3,4], 4, 3)
- * [1,2,3] would be shown rather over [3,2,1] whereas
- * for combinations([3,4,2,1], 4, 3) [3,2,1] would be shown.
- */
-perm combinations(void *collection, uint8_t n, uint8_t k, uint64_t objsize);
+/***
+ """
+     All of these functions will allocate memory for a new container
+    of size (width * objsize) * (height) = (k * objsize) * P(n, k)
+    where P denotes the standard combinatorics function for each
+    rearrangement function listed.
+     These must be freed by the caller using perm_kill(&P).
+ """
+ **/
 
-/**/
-void *cycle(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
+/*-------------------------------------------------------------------
+ *  Permutes the array such that both the elements and the ordering
+ * are unique. i.e. , if the call was combinations([1,2,3,4], 4, 3),
+ * only one of either [1,2,3] or [3,2,1] will exist.
+ *  The ordering takes first encountered elements to be of higher
+ * priority. i.e. from the example above [1,2,3] would be preferred
+ * over [3,2,1]. Whereas for combinations([3,4,2,1], 4, 3) [3,2,1]
+ * would be shown.
+ *-----------------------------------------------------------------*/
+struct perm combinations(void* collection, uint8_t n, uint8_t k);
 
-/**/
-perm permutations(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
+/*---------------------------------------------------------
+ * Returns all possible rearrangemenents of the collection
+ *-------------------------------------------------------*/
+struct perm permutations(void* collection, uint8_t n, uint8_t k);
 
-/**/
-void perm_kill(perm);
+/*----------------------------------
+ * free the allocated 2D perm array
+ *--------------------------------*/
+void perm_kill(struct perm*);
 
-/**/
-void printPerm(perm group, void (*prettyPrint)(void *));
+/*-------------------------------------------------------
+ * print the perms with a pretty printer for the objects
+ *-----------------------------------------------------*/
+void print_perm(struct perm*, void (*pretty_print)(void *));
 
 #endif /* _PERMUTATIONS_H_ */
