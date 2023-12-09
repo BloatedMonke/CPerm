@@ -1,15 +1,13 @@
 #ifndef _PERMUTATIONS_H_
 #define _PERMUTATIONS_H_
 
+#include <stddef.h>
 #include <stdint.h>
 
 #define   perm_group(P) ((P).group)
 #define   perm_width(P) ((P).width)
 #define  perm_height(P) ((P).height)
 #define perm_objsize(P) ((P).objsize)
-
-/* a more fitting name for the operation */
-typedef uint8_t byte;
 
 struct perm
 {
@@ -18,11 +16,14 @@ struct perm
     uint8_t width;
     uint32_t objsize;
 };
-typedef struct perm
-perm;
+
+/* perm_init is to be called before any perm takes place.
+ * any perm henceforth will assume that objsize until 
+ * perm_init is called again with a new objsize */
+void perm_init(size_t objsize);
 
 /* all of these functions will allocate memory for a new 
- * container of size (width * sizeof(object)) * (height) =
+ * container of size (width * objsize) * (height) =
  * (k * objsize) * P(n, k) where P denotes the standard
  * permute function for each permutation listed.
  *
@@ -39,18 +40,15 @@ perm;
  * [1,2,3] would be shown rather over [3,2,1] whereas
  * for combinations([3,4,2,1], 4, 3) [3,2,1] would be shown.
  */
-perm combinations(void *collection, uint8_t n, uint8_t k, uint64_t objsize);
+perm combinations(void *collection, uint8_t n, uint8_t k);
 
 /**/
-void *cycle(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
+perm permutations(void *collection, uint64_t n, uint64_t k);
 
-/**/
-perm permutations(void *collection, uint64_t n, uint64_t k, uint64_t objsize);
-
-/**/
+/* free the allocated 2D perm array */
 void perm_kill(perm);
 
-/**/
-void printPerm(perm group, void (*prettyPrint)(void *));
+/* print the perms with a  */
+void print_perm(perm group, void (*pretty_print)(void *));
 
 #endif /* _PERMUTATIONS_H_ */
