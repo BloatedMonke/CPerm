@@ -4,10 +4,7 @@
 #include <stdint.h>
 
 /**/
-uint64_t choose(uint64_t n, uint64_t k);
-
-/**/
-int64_t choose_e(int64_t n, uint64_t k);
+uint64_t nCk(uint64_t n, uint64_t k);
 
 /**/
 uint64_t nPr(uint64_t n, uint64_t r);

@@ -48,7 +48,7 @@ rearrange(int * __restrict rowN, int ijk, int k, int counters[k], int ijk_ends[k
 
 perm combinations(void *collection, uint8_t n, uint8_t k, size_t size)
 {
-    uint64_t height = choose(n, k);
+    uint64_t height = nCk(n, k);
     
     byte *group = malloc(height * k * size);
 
