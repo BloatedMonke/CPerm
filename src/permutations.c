@@ -1,7 +1,11 @@
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include "combinatorics.h"
 #include "permutations.h"
+
+#undef perm_init
+#undef combinations
 
 #define   get_perm_group(P) ((P)->group)
 #define   get_perm_width(P) ((P)->width)
@@ -12,13 +16,6 @@ typedef uint8_t byte;
 typedef unsigned int uint;
 typedef struct perm perm;
 
-extern size_t PERM_OBJ_SIZE;
-
-void perm_init(size_t objsize)
-{
-    PERM_OBJ_SIZE = objsize;
-}
-
 void perm_kill(perm *A)
 {
     free(get_perm_group(A));
@@ -27,11 +24,13 @@ void perm_kill(perm *A)
 /*-------------------------------------
  * automating for loops with recursion
  *-----------------------------------*/
-void rearrange(int * __restrict rowN, int ijk, int k, int counters[k], int ijk_ends[k], byte * __restrict arr, byte * __restrict group)
+static inline void
+rearrange(int * __restrict rowN, int ijk, int k, int counters[k], int ijk_ends[k],
+          byte * __restrict arr, byte * __restrict group, size_t size)
 {
     if (ijk == k) {
         for (int iter = 0; iter < k; ++iter)
-            memcpy(group + (*rowN * k + iter) * PERM_OBJ_SIZE, arr + counters[iter] * PERM_OBJ_SIZE, PERM_OBJ_SIZE);
+            memcpy(group + (*rowN * k + iter) * size, arr + counters[iter] * size, size);
 
         ++*rowN;
         return;
@@ -42,63 +41,86 @@ void rearrange(int * __restrict rowN, int ijk, int k, int counters[k], int ijk_e
          counters[ijk] < ijk_ends[ijk];
          ++counters[ijk])
 
-        rearrange(rowN, ijk + 1, k, counters, ijk_ends, arr, group);
+        rearrange(rowN, ijk + 1, k, counters, ijk_ends, arr, group, size);
 
     return;
 }
 
-perm combinations(void *collection, uint8_t n, uint8_t k)
+perm combinations(void *collection, uint8_t n, uint8_t k, size_t size)
 {
     uint64_t height = choose(n, k);
     
-    byte *group = malloc(height * k * PERM_OBJ_SIZE);
+    byte *group = malloc(height * k * size);
+
+    if (size < 1 || !group) {
+        height = k = 0;
+        free(group);
+        group = NULL;
+    }
 
     /** setup loop variables */
     int counters[k], ijk_ends[k], rowN = 0;
-    for (int i = 0; i < k; ++i)
-    {
+    for (int i = 0; i < k; ++i) {
         counters[i] = i;
         ijk_ends[i] = n - k + i + 1;
     }
 
-    rearrange(&rowN, 0, k, counters, ijk_ends, collection, group);
+    rearrange(&rowN, 0, k, counters, ijk_ends, collection, group, size);
 
-    return (perm){.group = group, .width = k, .height = height, .objsize = PERM_OBJ_SIZE};
+    return (perm){.group = group, .width = k, .height = height, .objsize = size};
 }
 
-void base_perm_swap(uint A[], int i, int j)
+static inline void base_perm_swap(uint A[], int i, int j)
 {
     A[i] ^= A[j];
     A[j] ^= A[i];
     A[i] ^= A[j];
 }
 
-/* TODO */
-void cycle(byte* __restrict collection, byte* __restrict group, uint8_t n, uint8_t k, uint base_perm[k])
-{
-    /* PHONY: */
-    n += k;
-    collection ?
-    ++base_perm[0]: ++base_perm[1];
-    group ? ++base_perm[1]: ++base_perm[2];
-    /* END PHONY */
-}
-
-perm permutations(void *collection, uint8_t n, uint8_t k)
+perm permutations(void *collection, uint8_t n, uint8_t k, size_t size)
 {
     uint64_t height = nPr(n, k);
 
-    uint seed[k];
-    for (uint i = 0; i < k; ++i) seed[i] = i;
+    uint seed[n], cycles[k], rowN = 0;
+    for (uint i = 0; i < n; ++i) seed[i] = i;
+    for (uint i = 0; i < k; ++i) cycles[i] = n - i;
 
-    byte *group = malloc(height * k * PERM_OBJ_SIZE);
-
-    for (uint j = 0; j < k; ++j) {
-        cycle(collection, group, n, k, seed);
-        base_perm_swap(seed, 1, j);
+    byte *group = malloc(height * k * size);
+    byte *pool = (byte *)collection;
+    for (uint i = 0; i < k; ++i)
+        memcpy(group + (rowN * k + i) * size, pool + (seed[i]) * size, size);
+    ++rowN;
+    
+    bool no_break = false;
+    while (true) {
+        if (no_break) break;
+        
+        for (int i = k-1; i >= 0; --i) {
+            cycles[i] -= 1;
+            
+            if (cycles[i] == 0) {
+                uint tmp = seed[i];
+                
+                for (uint j = i + 1; j < k; ++j)
+                    seed[j-1] = seed[j];
+        
+                seed[k-1] = tmp;
+                cycles[i] = n - i;
+            }
+            
+            else {
+                base_perm_swap(seed, i, n - cycles[i]);
+                for (uint j = 0; j < k; ++j)
+                    memcpy(group + (rowN * k + j) * size, pool + (seed[j]) * size, size);
+                
+                ++rowN;
+                no_break = false;
+                break;
+            }
+            no_break = true;
+        }
     }
-
-    return (perm){.group = group, .width = k, .height = height, .objsize = PERM_OBJ_SIZE};
+    return (perm){.group = group, .width = k, .height = height, .objsize = size};
 }
 
 /* =====================================================

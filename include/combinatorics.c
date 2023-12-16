@@ -7,9 +7,9 @@ uint64_t choose(uint64_t n, uint64_t k)
 
 uint64_t nPr(uint64_t n, uint64_t r)
 {
-    if (k == 0) return 1;
+    if (r <= 0) return 1;
     uint64_t p = 1;
-    for (uint8_t i = n - k + 1; i <= n; ++i) {
+    for (uint8_t i = n - r + 1; i <= n; ++i) {
         p *= i;
     }
     return p;    
