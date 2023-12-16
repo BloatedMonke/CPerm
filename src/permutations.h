@@ -26,15 +26,15 @@ struct perm {
  """
  **/
 
-/*-------------------------------------------------------------------
- *  Permutes the array such that both the elements and the ordering
+/*----------------------------------------------------------------------
+ *  Permutes the array such that only the elements of each rearrangement
  * are unique. i.e. , if the call was combinations([1,2,3,4], 4, 3),
  * only one of either [1,2,3] or [3,2,1] will exist.
  *  The ordering takes first encountered elements to be of higher
  * priority. i.e. from the example above [1,2,3] would be preferred
  * over [3,2,1]. Whereas for combinations([3,4,2,1], 4, 3) [3,2,1]
  * would be shown.
- *-----------------------------------------------------------------*/
+ *--------------------------------------------------------------------*/
 struct perm combinations(void* collection, uint8_t n, uint8_t k, size_t size);
 
 /*---------------------------------------------------------
