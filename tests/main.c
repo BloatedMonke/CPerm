@@ -24,7 +24,7 @@ typedef unsigned int uint;
 
 #define lengthof(x) (sizeof(x) / sizeof(*(x)))
 
-/* For structs this means the actual name w/o struct */
+/* For structs/ unions this means the actual identifier */
 #define MAX_TYPE_NAME_LEN 10
 
 char perm_funcs[TEST_FILE_LEN] = {0};
