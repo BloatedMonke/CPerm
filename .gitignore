@@ -12,3 +12,7 @@ db*
 *.out
 main
 main_*
+
+# debug
+*debug*
+dbg*

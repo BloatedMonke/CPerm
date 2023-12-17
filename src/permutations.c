@@ -4,9 +4,6 @@
 #include "combinatorics.h"
 #include "permutations.h"
 
-#undef perm_init
-#undef combinations
-
 #define   get_perm_group(P) ((P)->group)
 #define   get_perm_width(P) ((P)->width)
 #define  get_perm_height(P) ((P)->height)
