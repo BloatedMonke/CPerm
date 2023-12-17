@@ -1,6 +1,6 @@
 VPATH = ../include ../src
 CFLAGS = -I../include -I../src -Wall -Wpedantic -Wextra -Werror -std=c99 -g3 -fsanitize=address
-SRC = main.c permutations.c combinatorics.c
+SRC = main.c cperm.c combinatorics.c
 objs = ${SRC:.c=.o}
 CC = gcc
 TEST_FILE_LEN = 3
@@ -44,7 +44,7 @@ test: all
 	rm debug*
 	less -R test_results.txt
 
-permutations.o: permutations.c
+cperm.o: cperm.c
 combinatorics.o: combinatorics.c
 
 main.o: main.c
