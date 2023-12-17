@@ -1,6 +1,6 @@
 VPATH = ../include ../src
 CFLAGS = -I../include -I../src -Wall -Wpedantic -Wextra -Werror -std=c99 -g3 -fsanitize=address
-SRC = main.c cperm.c combinatorics.c
+SRC = main.c cperm.c
 objs = ${SRC:.c=.o}
 CC = gcc
 TEST_FILE_LEN = 3
