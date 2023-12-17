@@ -18,55 +18,6 @@ void perm_kill(perm *A)
     free(get_perm_group(A));
 }
 
-/*-------------------------------------
- * automating for loops with recursion
- *-----------------------------------*/
-static inline void
-rearrange(int * __restrict rowN, int ijk, int k, int counters[k], int ijk_ends[k],
-          byte * __restrict arr, byte * __restrict group, size_t size)
-{
-    if (ijk == k) {
-        for (int iter = 0; iter < k; ++iter)
-            memcpy(group + (*rowN * k + iter) * size, arr + counters[iter] * size, size);
-
-        ++*rowN;
-        return;
-    }
-
-    /** set counters to their new state and continue the loop */
-    for (counters[ijk] = (counters[ijk - 1 * (ijk > 0)] + 1) * (ijk > 0);
-         counters[ijk] < ijk_ends[ijk];
-         ++counters[ijk])
-
-        rearrange(rowN, ijk + 1, k, counters, ijk_ends, arr, group, size);
-
-    return;
-}
-
-perm combinations(void *collection, uint8_t n, uint8_t k, size_t size)
-{
-    uint64_t height = nCk(n, k);
-    
-    byte *group = malloc(height * k * size);
-
-    if (size < 1 || !group) {
-        height = k = 0;
-        free(group);
-        group = NULL;
-    }
-
-    /** setup loop variables */
-    int counters[k], ijk_ends[k], rowN = 0;
-    for (int i = 0; i < k; ++i) {
-        counters[i] = i;
-        ijk_ends[i] = n - k + i + 1;
-    }
-
-    rearrange(&rowN, 0, k, counters, ijk_ends, collection, group, size);
-
-    return (perm){.group = group, .width = k, .height = height, .objsize = size};
-}
-
 static inline void base_perm_swap(uint A[], int i, int j)
 {
     A[i] ^= A[j];
@@ -117,6 +68,55 @@ perm permutations(void *collection, uint8_t n, uint8_t k, size_t size)
             no_break = true;
         }
     }
+    return (perm){.group = group, .width = k, .height = height, .objsize = size};
+}
+
+/*-------------------------------------
+ * automating for loops with recursion
+ *-----------------------------------*/
+static inline void
+rearrange(int * __restrict rowN, int ijk, int k, int counters[k], int ijk_ends[k],
+          byte * __restrict arr, byte * __restrict group, size_t size)
+{
+    if (ijk == k) {
+        for (int iter = 0; iter < k; ++iter)
+            memcpy(group + (*rowN * k + iter) * size, arr + counters[iter] * size, size);
+
+        ++*rowN;
+        return;
+    }
+
+    /** set counters to their new state and continue the loop */
+    for (counters[ijk] = (counters[ijk - 1 * (ijk > 0)] + 1) * (ijk > 0);
+         counters[ijk] < ijk_ends[ijk];
+         ++counters[ijk])
+
+        rearrange(rowN, ijk + 1, k, counters, ijk_ends, arr, group, size);
+
+    return;
+}
+
+perm combinations(void *collection, uint8_t n, uint8_t k, size_t size)
+{
+    uint64_t height = nCk(n, k);
+    
+    byte *group = malloc(height * k * size);
+
+    if (size < 1 || !group) {
+        height = k = 0;
+        free(group);
+        group = NULL;
+    }
+
+    /** setup loop variables */
+    int counters[k], ijk_ends[k], rowN = 0;
+    for (int i = 0; i < k; ++i) {
+        counters[i] = i;
+        ijk_ends[i] = n - k + i + 1;
+    }
+
+    rearrange(&rowN, 0, k, counters, ijk_ends, collection, group, size);
+
     return (perm){.group = group, .width = k, .height = height, .objsize = size};
 }
 
