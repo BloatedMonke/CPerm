@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "permutations.h"
+#include "cperm.h"
 
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #include <windows.h>

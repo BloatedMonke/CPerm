@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "combinatorics.h"
-#include "permutations.h"
+#include "cperm.h"
 
 #define   get_perm_group(P) ((P)->group)
 #define   get_perm_width(P) ((P)->width)
