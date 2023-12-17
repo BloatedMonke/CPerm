@@ -1,3 +1,12 @@
+/***
+ """
+    Copyright 2023 BloatedMonke
+    Use of this source code is
+    governed by an MIT-style license.
+    Refer to the LICENSE file included.
+ """
+ **/
+
 #ifndef _PERMUTATIONS_H_
 #define _PERMUTATIONS_H_
 
