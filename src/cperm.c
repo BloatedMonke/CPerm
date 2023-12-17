@@ -4,10 +4,10 @@
 #include "combinatorics.h"
 #include "cperm.h"
 
-#define   get_perm_group(P) ((P)->group)
-#define   get_perm_width(P) ((P)->width)
-#define  get_perm_height(P) ((P)->height)
-#define get_perm_objsize(P) ((P)->objsize)
+#define   get_pg(P) ((P)->group)
+#define   get_pw(P) ((P)->width)
+#define   get_ph(P) ((P)->height)
+#define  get_pos(P) ((P)->objsize)
 
 typedef uint8_t byte;
 typedef unsigned int uint;
@@ -15,7 +15,7 @@ typedef struct perm perm;
 
 void perm_kill(perm *A)
 {
-    free(get_perm_group(A));
+    free(get_pg(A));
 }
 
 static inline void base_perm_swap(uint A[], int i, int j)
@@ -159,13 +159,13 @@ uint64_t fact(uint64_t n)
 void print_perm(perm *group, void (*pretty_print)(void *))
 {
     printf("[\n");
-    for (uint i = 0; i < get_perm_height(group); ++i) {
+    for (uint i = 0; i < get_ph(group); ++i) {
         printf("[");
-        for (uint j = 0; j < get_perm_width(group); ++j) {
-            pretty_print( (void *)&((byte *)get_perm_group(group))[ (i * get_perm_width(group) + j) * get_perm_objsize(group)] );
-            printf("%s", j < get_perm_width(group) - 1u ? ", ": "");
+        for (uint j = 0; j < get_pw(group); ++j) {
+            pretty_print( (void *)&((byte *)get_pg(group))[ (i * get_pw(group) + j) * get_pos(group)] );
+            printf("%s", j < get_pw(group) - 1u ? ", ": "");
         }
-        printf("]%s\n", i < get_perm_height(group) - 1 ? ",": "");
+        printf("]%s\n", i < get_ph(group) - 1 ? ",": "");
     }
     printf("]\n");
 }
