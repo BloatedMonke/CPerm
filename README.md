@@ -71,6 +71,8 @@ gcc -Iinclude/ -o cperm.o -c src/cperm.c
 
 Known to compile with gcc & clang.
 
+Supports C99 onwards. There are plans to support C89.
+
 ## Functions
 
 As of right now only permutations and combinations are available. The plan is to add a lot more behaviour and functions. Contributions are welcome (see [CONTRIBUTING.md](https://github.com/BloatedMonke/CPerm/blob/main/CONTRIBUTING.md)).
