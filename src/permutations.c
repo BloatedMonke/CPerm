@@ -129,9 +129,9 @@ perm combinations(void *collection, uint8_t n, uint8_t k, size_t size)
 void print_perm(perm *group, void (*pretty_print)(void *))
 {
     printf("[\n");
-    for (uint i = 0; i < get_perm_height(group); ++i){
+    for (uint i = 0; i < get_perm_height(group); ++i) {
         printf("[");
-        for (uint j = 0; j < get_perm_width(group); ++j){
+        for (uint j = 0; j < get_perm_width(group); ++j) {
             pretty_print( (void *)&((byte *)get_perm_group(group))[ (i * get_perm_width(group) + j) * get_perm_objsize(group)] );
             printf("%s", j < get_perm_width(group) - 1u ? ", ": "");
         }
