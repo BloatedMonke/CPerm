@@ -26,7 +26,7 @@ int main(void)
 {
     struct Foo foo[4];
     int n = sizeof(foo) / sizeof(*foo);
-    int k = 2;
+    int k = n;
     
     for (int i = 0, c = 'a'; i < n; ++i, ++c) {
         foo[i].bar = i+1;
@@ -38,18 +38,30 @@ int main(void)
 
     /** Output
     [
-    [1a, 2b],
-    [1a, 3c],
-    [1a, 4d],
-    [4d, 1a],
-    [4d, 2b],
-    [4d, 3c],
-    [1a, 3c],
-    [1a, 4d],
-    [1a, 2b],
-    [4d, 2b],
-    [4d, 3c],
-    [4d, 1a]
+    [1a, 2b, 3c, 4d],
+    [1a, 2b, 4d, 3c],
+    [1a, 3c, 2b, 4d],
+    [1a, 3c, 4d, 2b],
+    [1a, 4d, 2b, 3c],
+    [1a, 4d, 3c, 2b],
+    [2b, 1a, 3c, 4d],
+    [2b, 1a, 4d, 3c],
+    [2b, 3c, 1a, 4d],
+    [2b, 3c, 4d, 1a],
+    [2b, 4d, 1a, 3c],
+    [2b, 4d, 3c, 1a],
+    [3c, 1a, 2b, 4d],
+    [3c, 1a, 4d, 2b],
+    [3c, 2b, 1a, 4d],
+    [3c, 2b, 4d, 1a],
+    [3c, 4d, 1a, 2b],
+    [3c, 4d, 2b, 1a],
+    [4d, 1a, 2b, 3c],
+    [4d, 1a, 3c, 2b],
+    [4d, 2b, 1a, 3c],
+    [4d, 2b, 3c, 1a],
+    [4d, 3c, 1a, 2b],
+    [4d, 3c, 2b, 1a]
     ]
     */
     /* Or iterate through it */
@@ -58,6 +70,8 @@ int main(void)
             /* Code */
         }
     }
+    /* then kill it */
+    perm_kill(&A);
 }
 ```
 
