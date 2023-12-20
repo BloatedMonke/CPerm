@@ -41,15 +41,15 @@ int main(void)
     [1a, 2b],
     [1a, 3c],
     [1a, 4d],
+    [2b, 1a],
+    [2b, 3c],
+    [2b, 4d],
+    [3c, 1a],
+    [3c, 2b],
+    [3c, 4d],
     [4d, 1a],
     [4d, 2b],
-    [4d, 3c],
-    [1a, 3c],
-    [1a, 4d],
-    [1a, 2b],
-    [4d, 2b],
-    [4d, 3c],
-    [4d, 1a]
+    [4d, 3c]
     ]
     */
     /* Or iterate through it */
@@ -58,6 +58,8 @@ int main(void)
             /* Code */
         }
     }
+    /*...*/
+    perm_kill(&A);
 }
 ```
 
