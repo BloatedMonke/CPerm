@@ -58,10 +58,10 @@ perm permutations(void *collection, uint8_t n, uint8_t k, size_t size)
             if (cycles[i] == 0) {
                 uint tmp = seed[i];
                 
-                for (uint j = i + 1; j < k; ++j)
+                for (uint j = i + 1; j < n; ++j)
                     seed[j-1] = seed[j];
         
-                seed[k-1] = tmp;
+                seed[n-1] = tmp;
                 cycles[i] = n - i;
             }
             
