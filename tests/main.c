@@ -1,83 +1,94 @@
+/***
+ """
+    Copyright 2023 BloatedMonke
+    Use of this source code is
+    governed by an MIT-style license.
+    Refer to the LICENSE file included.
+ """
+ **/
+
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "cperm.h"
 
 #if defined(_MSC_VER) || defined(__MINGW32__)
-#include <windows.h>
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+HANDLE WINAPI   GetStdHandle(_In_ DWORD  nStdHandle);
+BOOL   WINAPI GetConsoleMode(_In_ HANDLE hConsoleHandle, _Out_ LPDWORD lpMode);
+BOOL   WINAPI SetConsoleMode(_In_ HANDLE hConsoleHandle, _In_ DWORD    dwMode);
 #endif
 
-#define RED     "\x1b[31m"
-#define GREEN   "\x1b[32m"
-#define RESET   "\x1b[0m"
+typedef unsigned char byte;
+typedef unsigned int  uint;
 
-#define FMT1(fmt) "Observed(%"fmt") == Expected(%"fmt") ?"
+#define RED              "\x1b[1;31m"
+#define RESET            "\x1b[0m"
+#define PURPLE           "\x1b[1;95m"
+#define UNDERLINE        "\x1b[4;37m"
+#define RED_UNDERLINE    "\x1b[4;31m"
+
+#define FMT1(fmt)        "Observed(%"fmt") == Expected(%"fmt") ?"
 #define TEST_FMT_STRING(observed, expected, fmt) \
-        FMT1(fmt)"    %s", observed, expected, (observed) == (expected) ? GREEN"True"RESET: RED"False"RESET
+        FMT1(fmt)"    %s", observed, expected, (observed) == (expected) ? "": RED"False"RESET
 
-void  int_assert_equals_msg(const int observed, const int expected, const char *msg);
-void char_assert_equals_msg(const char observed, const char expected, const char *msg);
-
-typedef uint8_t byte;
-typedef unsigned int uint;
-
-#define lengthof(x) (sizeof(x) / sizeof(*(x)))
-
-/* For structs/ unions this means the actual identifier */
+/* Does not include structs */
 #define MAX_TYPE_NAME_LEN 10
+#define STRUCT_IDENTIFIER "-"
 
-char perm_funcs[TEST_FILE_LEN] = {0};
-const char *testers[TEST_FILE_LEN] = {NULL};
-char types[TEST_FILE_LEN][MAX_TYPE_NAME_LEN+2] = {{0}};
+                /* source of truths */
+const char*             sots[MAX_TEST_FILE_COUNT] = {NULL};
+char                 perm_funcs[MAX_TEST_FILE_COUNT] = {0};
+char types[MAX_TEST_FILE_COUNT][MAX_TYPE_NAME_LEN+2] = {{0}};
 
-uint Ns[TEST_FILE_LEN] = {0};
-uint Ks[TEST_FILE_LEN] = {0};
+uint      Ns[MAX_TEST_FILE_COUNT] = {0};
+uint      Ks[MAX_TEST_FILE_COUNT] = {0};
+size_t sizes[MAX_TEST_FILE_COUNT] = {0};
 uint len = 0;
 
-FILE *files[TEST_FILE_LEN] = {NULL};
+FILE *files[MAX_TEST_FILE_COUNT] = {NULL};
 
-void  int_pretty_print(void *xp){ printf("%d", *(int*)xp); }
-void char_pretty_print(void *xp){ printf("%c", *(char*)xp); }
+bool  int_assert_equals_msg(const int  observed, const int  expected, const char *msg);
+bool char_assert_equals_msg(const char observed, const char expected, const char *msg);
+
+const char *ordstem(uint x);
+static inline void pexit(uint l, uint k, const char* const s, struct perm* groups, uint i);
+void  int_pretty_fprint(FILE *file, void *xp){ fprintf(file, "%d", *(int *)xp); }
+void char_pretty_fprint(FILE *file, void *xp){ fprintf(file, "%c", *(char*)xp); }
 
 void parse(void);
 void run_test(void);
 
 int main(int argc, const char *argv[])
 {
-    if (argc > TEST_FILE_LEN + 1) {
-        printf("ERROR:: Too many arguments to %s\n", argv[0]);
-        printf("        Current Max number of tester files: %d\n", TEST_FILE_LEN);
-        printf("        To change this pass TEST_FILE_LEN=N to make as an argument: "
-               "make TEST_FILE_LEN=N\n");
-        printf("        Where N is the new max\n");
+    if (argc > MAX_TEST_FILE_COUNT + 1) {
+        fprintf(stderr, RED"ERROR"RESET":: Too many arguments to %s\n", argv[0]);
+        fprintf(stderr, "        Current Max number of tester files: %d\n", MAX_TEST_FILE_COUNT);
+        fprintf(stderr, "        You passed in %d\n", argc - 1);
+        fprintf(stderr, "        To change this pass MAX_TEST_FILE_COUNT=N to make as an argument:\n"
+                        "        \t\tmake test MAX_TEST_FILE_COUNT=N\n");
+        fprintf(stderr, "        Where N is the new max\n");
         return 1;
     }
 
     if (argc == 1) {
-        printf("ERROR:: No truth files passed in for testing\n");
-        printf("Exiting...\n");
+        fprintf(stderr, RED"ERROR"RESET":: No truth files passed in for testing\n");
+        fprintf(stderr, "Exiting...\n");
         return 2;
     }
 
-    if (TEST_FILE_LEN < 1) {
-        printf("Max No. Tests < 1 (-_-)\n");
+    if (MAX_TEST_FILE_COUNT < 1) {
+        fprintf(stderr, RED"ERROR"RESET":: Max No. Tests < 1 (-_-)\n");
         return 3;
     }
 
     len = argc - 1;
-    if (len > TEST_FILE_LEN) {
-        printf("ERROR:: Passed in more than TEST_FILE_LEN=%d tests\n", TEST_FILE_LEN);
-        printf("        Consider changing the TEST_FILE_LEN by passing it to make or");
-        printf("decrease the number of files passed to the program\n");
-        return 4;
-    }
-
     for (uint i = 0; i < len; ++i) {
-        testers[i] = argv[i+1];
-        files[i] = fopen(testers[i], "r");
+        sots[i] = argv[i+1];
+        files[i] = fopen(sots[i], "r");
         if (!files[i]) {
-            printf("ERROR:: Could not find %s\n", testers[i]);
+            fprintf(stderr, RED"ERROR"RESET":: Could not find %s\n", sots[i]);
             return 5;
         }
     }
@@ -92,9 +103,10 @@ int main(int argc, const char *argv[])
 }
 
 /* set colours */
-void __attribute__((constructor)) cnstr(void)
-{
 #if defined(_MSC_VER) || defined(__MINGW32__)
+void __attribute__((constructor))
+cnstr(void)
+{
     HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
     if (handle == INVALID_HANDLE_VALUE) return;
     
@@ -103,13 +115,13 @@ void __attribute__((constructor)) cnstr(void)
         mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
         SetConsoleMode(handle, mode);
     }
-#endif
 }
+#endif
 
 void parse(void)
 {
     for (uint i = 0; i < len; ++i) {
-        const char * const s = testers[i];
+        const char * const s = sots[i];
         
         /* Grab the func */
         perm_funcs[i] = s[0];
@@ -126,10 +138,20 @@ void parse(void)
             exit(6);
         }
         
-        int zen = s[3] == '?' ? MAX_TYPE_NAME_LEN + 1: MAX_TYPE_NAME_LEN;
-        for (int j = 0; j < zen && s[j+3] != '.'; ++j)
+        for (int j = 0; j < MAX_TYPE_NAME_LEN && s[j+3] != '.'; ++j)
             types[i][j] = s[j+3];
-        types[i][zen] = '\0';
+        types[i][MAX_TYPE_NAME_LEN] = '\0';
+
+        if (strcmp(types[i], "int") == 0) {
+            sizes[i] = sizeof(int);
+        }
+        if (strcmp(types[i], "char") == 0) {
+            sizes[i] = sizeof(char);
+        }
+        if (strcmp(types[i], STRUCT_IDENTIFIER) == 0) {
+            sizes[i] = atoi(s+4);
+            freopen(sots[i], "rb", files[i]);
+        }
     }
 }
 
@@ -142,30 +164,18 @@ struct internal_perm {
 typedef struct internal_perm
 INTERNAL_PERM_T;
 
-/***
- """
-     The goal is to build some sort of meta template thing (possibly using generics ?)
-    for dynamic type testing.
-     This will have to do for now.
- """
- **/
+struct anon {
+    char pad;
+    byte data[];
+} __attribute__((aligned(__alignof__(long double))));
+typedef struct anon
+INTERNAL_ANON_T;
+
 void run_test(void)
 {
-    uint sizes[TEST_FILE_LEN];
-    INTERNAL_PERM_T groups[TEST_FILE_LEN] = {{.group = NULL}};    
+    INTERNAL_PERM_T groups[MAX_TEST_FILE_COUNT] = {{.group = NULL}};    
 
     for (uint i = 0; i < len; ++i) {
-        if (strcmp(types[i], "int") == 0) {
-            sizes[i] = sizeof(int);
-        }
-        if (strcmp(types[i], "char") == 0) {
-            sizes[i] = sizeof(char);
-        }
-        if (strcmp(types[i], "?") == 0) {
-            /* nothing we can do right now */
-            sizes[i] = 0;
-        }
-        
         /** Grab the array */
         char s[3*Ns[i] - 1];
         int j = 0, k = 0, num;
@@ -198,7 +208,7 @@ void run_test(void)
 
         /* format */
         if (i > 0) puts("");
-        printf("\t\t%s\n\n", s);
+        printf("\t\t%s\tn = %d  k = %d\n\n", s, Ns[i], Ks[i]);
 
         /** Run the asserts */
         
@@ -206,7 +216,7 @@ void run_test(void)
         fgetc(files[i]); fgetc(files[i]);
         for (uint l = 0; l < groups[i].height; ++l) {
             j = k = 0;
-            fgets(s, 3*Ns[i] - 1, files[i]);
+            fgets(s, 3*Ks[i] - 1, files[i]);
             fgetc(files[i]);
             
             while (s[j]) {
@@ -217,55 +227,102 @@ void run_test(void)
                 if (strcmp(types[i], "int") == 0) {
                     num = atoi(s + j);
                     int *iarr = groups[i].group;
-
-                    /* need to add message here */
-                    int_assert_equals_msg(iarr[l * Ns[i] + k], num, "");
+                    if (iarr == NULL && Ks[i] != 0)
+                        pexit(l, k, s, (struct perm *)groups, i);
+                    if (iarr != NULL)
+                    /* add msg when the asserts take fmts */
+                    if (!int_assert_equals_msg(iarr[l * Ks[i] + k], num, "")) {
+                        pexit(l, k, s, (struct perm *)groups, i);
+                    }
                 }
                 if (strcmp(types[i], "char") == 0) {
                     char *carr = groups[i].group;
-                    
-                    /* need to add message here */
-                    char_assert_equals_msg(carr[l * Ns[i] + k], s[j], "");
+                    if (carr == NULL && Ks[i] != 0)
+                        pexit(l, k, s, (struct perm *)groups, i);
+                    if (carr != NULL)
+                    /* add msg when the asserts take fmts */
+                    if (!char_assert_equals_msg(carr[l * Ks[i] + k], s[j], "")) {
+                        pexit(l, k, s, (struct perm *)groups, i);
+                    }
                 }
                 ++j, ++k;
             }
         }
+        printf("::all equal::\n");
         perm_kill((struct perm *)&groups[i]);
     }
+}
 
+static inline void
+pexit(uint l, uint k, const char* const s, struct perm* groups, uint i)
+{
+    fprintf(stderr, RED"::FAILURE::%s"RESET PURPLE" %d%s Line, %d%s Row, %d%s Column:\nExpected [%s] but observed "RESET, sots[i], l+3, ordstem(l+3), l+1, ordstem(l+1), k+1, ordstem(k+1), s);
+    
+    /* TODO:: use ncurses so that only the k'th symbol gets underlined*/
+    fprintf(stderr, RED_UNDERLINE);
+    perm_fprint(stderr, (groups+i), l, char_pretty_fprint);
+    fprintf(stderr, RESET);
+    exit(0xff);
 }
 
 /*============ 
-  asserts 
+  Asserts 
 ============*/
 
-/* As of right now perms won't die on early exit. Add a fix then bring back early 
- * exit on fail
+/* TODO::
+ *     - let these take fmt strings
  */
 
-void int_assert_equals_msg(const int observed, const int expected, const char *msg)
+bool int_assert_equals_msg(const int observed, const int expected, const char *msg)
 {
-    printf(TEST_FMT_STRING(observed, expected, "d"));
-    puts("");
-
     if (observed != expected){
+        fprintf(stderr, TEST_FMT_STRING(observed, expected, "d"));
+        printf("\n");
         printf("%s\n", msg);
-#if 0
-        printf("exiting...\n");
-        exit(0xff);
-#endif
+        return false;
     }
+    return true;
 }
 
-void char_assert_equals_msg(const char observed, const char expected, const char *msg){
-    printf(TEST_FMT_STRING(observed, expected, "c"));
-    puts("");
-
+bool char_assert_equals_msg(const char observed, const char expected, const char *msg)
+{
     if (observed != expected){
+        fprintf(stderr, TEST_FMT_STRING(observed, expected, "c"));
+        printf("\n");
         printf("%s\n", msg);
-#if 0
-        printf("exiting...\n");
-        exit(0xff);
-#endif
+        return false;
     }
+    return true;
+}
+
+/*============
+  Utility
+ ===========*/
+
+const char *ordstem(uint x)
+{
+    switch (x%20) {
+    case 0:  return "th";
+    case 1:  return "st";
+    case 2:  return "nd";
+    case 3:  return "rd";
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
+    case 18:
+    case 19: return "th";
+    default: break;
+    }
+    return ""; /* make the compiler happy */
 }
