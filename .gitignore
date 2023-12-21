@@ -2,17 +2,16 @@
 *.o
 
 # libraries
+*.dll
 *.so
-
-# my own debug files
-db*
 
 # executables
 *.exe
 *.out
-main
-main_*
 
 # debug
-*debug*
+debug*
 dbg*
+
+# test results
+test_results.txt
