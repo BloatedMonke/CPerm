@@ -60,9 +60,21 @@ void perm_kill(struct perm*);
    utility functions
 ====================================================== */
 
-/*-------------------------------------------------------
- * print the perms with a pretty printer for the objects
- *-----------------------------------------------------*/
-void print_perm(struct perm*, void (*pretty_print)(void *));
+/*--------------------------------------------------------------
+ * print all arrangements with a pretty printer for the objects
+ *------------------------------------------------------------*/
+void perm_print_all(struct perm*, void (*pretty_print)(void *));
+
+/*--------------------------------------------------------------------
+ * print the idx'th arrangement with a pretty printer for the objects
+ *------------------------------------------------------------------*/
+void perm_print(struct perm *group, size_t idx, void (*pretty_print)(void *));
+
+#include <stdio.h>
+
+/*-----------------------------------------------------------
+ * similar to perm_print, but send the output to file instad
+ *---------------------------------------------------------*/
+void perm_fprint(FILE *file, struct perm *group, size_t idx, void (*pretty_fprint)(FILE *, void *));
 
 #endif /* _PERMUTATIONS_H_ */
