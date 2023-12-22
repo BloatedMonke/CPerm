@@ -13,26 +13,37 @@
 #include "combinatorics.h"
 #include "cperm.h"
 
-#define   get_pg(P) ((P)->group)
-#define   get_pw(P) ((P)->width)
-#define   get_ph(P) ((P)->height)
-#define  get_pos(P) ((P)->objsize)
-
 typedef unsigned char byte;
 typedef unsigned int uint;
-typedef struct perm perm;
-struct internal_perm {
+
+struct perm {
     void*     group;
     uint64_t height;
     uint8_t   width;
     size_t  objsize;
 };
-typedef struct internal_perm
-INTERNAL_PERM_T;
+typedef struct perm
+perm;
+
+#define   get_pg(P) ((P)->group)
+#define   get_pw(P) ((P)->width)
+#define   get_ph(P) ((P)->height)
+#define  get_pos(P) ((P)->objsize)
+
+static inline perm *perm_birth(void)
+{
+    perm *new = malloc(sizeof(*new));
+    new->group = NULL;
+    new->width = 0;
+    new->height = 1;
+    new->objsize = 0;
+    return new;
+}
 
 void perm_kill(perm *A)
 {
     free(get_pg(A));
+    free(A);
 }
 
 static inline void base_perm_swap(uint A[], int i, int j)
@@ -42,28 +53,22 @@ static inline void base_perm_swap(uint A[], int i, int j)
     A[i] ^= A[j];
 }
 
-perm permutations(void *collection, uint8_t n, uint8_t k, size_t size)
+perm *permutations(void *collection, uint8_t n, uint8_t k, size_t size)
 {
     uint64_t height = nPr(n, k);
 
-    INTERNAL_PERM_T circle;
+    perm *circle;
     byte *group;
     byte *pool;
 
-    bool no_break = false;
-    group = malloc(height * k * size);
-    pool = (byte *)collection;
+    pool   = (byte *)collection;
+    group  = malloc(height * k * size);
+    circle = perm_birth();
 
     if (0 == size || !group || k > n || 0 == k) {
         free(group);
-        circle.group = NULL;
-        circle.width = 0;
-        circle.height = 1;
-        circle.objsize = 0;
-        n = k = 0;
-        no_break = true;
+        return circle;
     }
-    
 
     uint seed[n], cycles[k], rowN;
     for (uint i = 0; i < n; ++i) seed[i] = i;
@@ -71,6 +76,7 @@ perm permutations(void *collection, uint8_t n, uint8_t k, size_t size)
     for (uint i = 0; i < k; ++i) memcpy(group + i * size, pool + (seed[i]) * size, size);
     
     rowN = 1;
+    bool no_break = false;
     while (true) {
         if (no_break) break;
         
@@ -92,13 +98,11 @@ perm permutations(void *collection, uint8_t n, uint8_t k, size_t size)
             no_break = true;            
         }
     }
-    if (k <= n && 0 != k) {
-        circle.group = group;
-        circle.width = k;
-        circle.height = height;
-        circle.objsize = size;
-    }
-    return *(struct perm *)&circle;
+    circle->group = group;
+    circle->width = k;
+    circle->height = height;
+    circle->objsize = size;
+    return circle;
 }
 
 /*-------------------------------------
@@ -126,14 +130,15 @@ rearrange(int * __restrict rowN, int ijk, int k, int counters[k], int ijk_ends[k
     return;
 }
 
-perm combinations(void *collection, uint8_t n, uint8_t k, size_t size)
+perm *combinations(void *collection, uint8_t n, uint8_t k, size_t size)
 {
     uint64_t height = nCk(n, k);
     
+    perm *circle = perm_birth();
     byte *group = malloc(height * k * size);
 
     if (0 == size || !group || k > n || 0 == k) {
-        height = k = 0;
+        height = k = size = 0;
         free(group);
         group = NULL;
     }
@@ -147,7 +152,12 @@ perm combinations(void *collection, uint8_t n, uint8_t k, size_t size)
 
     rearrange(&rowN, 0, k, counters, ijk_ends, collection, group, size);
 
-    return (perm){.group = group, .width = k, .height = height, .objsize = size};
+    circle->group = group;
+    circle->width = k;
+    circle->height = height;
+    circle->objsize = size;
+    
+    return circle;
 }
 
 /* ========================
@@ -220,4 +230,24 @@ void perm_fprint(FILE *file, perm *group, size_t idx, void (*pretty_fprint)(FILE
         fprintf(file, "%s", j < get_pw(group) - 1u ? ", ": "");
     }
     fprintf(file, "]\n");
+}
+
+void *perm_group(perm *P)
+{
+    return get_pg(P);
+}
+
+uint8_t perm_width(perm *P)
+{
+    return get_pw(P);
+}
+
+size_t perm_height(perm *P)
+{
+    return get_ph(P);
+}
+
+size_t perm_size(perm *P)
+{
+    return get_pos(P);
 }

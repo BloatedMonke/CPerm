@@ -34,22 +34,19 @@ all: debugO0 debugO1 debugO2 debugO3
 
 test: all
 	> test_results.txt
-	@echo "no optimisations" >> test_results.txt
-	@echo ""                 >> test_results.txt
-	./debugO0 $(STD_FILES)  >> test_results.txt
-	@echo ""                 >> test_results.txt
-	@echo "level 1"          >> test_results.txt
-	@echo ""                 >> test_results.txt
-	./debugO1 $(STD_FILES)  >> test_results.txt
-	@echo ""                 >> test_results.txt
-	@echo "level 2"          >> test_results.txt
-	@echo ""                 >> test_results.txt
-	./debugO2 $(STD_FILES)  >> test_results.txt
-	@echo ""                 >> test_results.txt
-	@echo "level 3"          >> test_results.txt
-	@echo ""                 >> test_results.txt
-	./debugO3 $(STD_FILES)  >> test_results.txt
-	less -R test_results.txt
+	./debugO0 $(STD_FILES)
+	./debugO1 $(STD_FILES)
+	./debugO2 $(STD_FILES)
+	./debugO3 $(STD_FILES) \
+	>> test_results.txt
+	@lines=$$(wc -l test_results.txt | awk '{print $$1}'); \
+	if [ $$lines -gt 20 ]; \
+	then \
+	  less test_results.txt; \
+	else \
+	  echo ""; \
+	  cat test_results.txt; \
+	fi
 
 cpermO0.o: cperm.c $(HEADERS)
 	$(CC) $(CFLAGS) -O0 -o $@ -c $<
@@ -61,10 +58,10 @@ cpermO3.o: cperm.c $(HEADERS)
 	$(CC) $(CFLAGS) -O3 -o $@ -c $<
 
 mainO0.o: main.c $(HEADERS)
-	$(CC) $(CFLAGS) $(AD_FLAG) -O0 -o $@ -c $<
+	$(CC) $(CFLAGS) $(AD_FLAG) -DOPT_LEVEL=0 -O0 -o $@ -c $<
 mainO1.o: main.c $(HEADERS)
-	$(CC) $(CFLAGS) $(AD_FLAG) -O1 -o $@ -c $<
+	$(CC) $(CFLAGS) $(AD_FLAG) -DOPT_LEVEL=1 -O1 -o $@ -c $<
 mainO2.o: main.c $(HEADERS)
-	$(CC) $(CFLAGS) $(AD_FLAG) -O2 -o $@ -c $<
+	$(CC) $(CFLAGS) $(AD_FLAG) -DOPT_LEVEL=2 -O2 -o $@ -c $<
 mainO3.o: main.c $(HEADERS)
-	$(CC) $(CFLAGS) $(AD_FLAG) -O3 -o $@ -c $<
+	$(CC) $(CFLAGS) $(AD_FLAG) -DOPT_LEVEL=3 -O3 -o $@ -c $<
