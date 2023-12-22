@@ -4,7 +4,7 @@ A collection of combinatoric generators and iterators to be used with an array o
 
 ## Usage
 
-All iterators return a ```struct perm ```. This struct contains the generated 2D array, its height, width and the size of the object being permuted.
+All iterators return a ```struct perm *```. This struct contains the generated 2D array, its height, width and the size of the object being permuted.
 
 ```c
 #include <stdio.h>
@@ -33,8 +33,8 @@ int main(void)
         foo[i].baz = c;
     }
     
-    struct perm A = permutations(foo, n, k, sizeof(*foo));
-    print_perm(&A, foo_pretty_print);
+    struct perm *A = permutations(foo, n, k, sizeof(*foo));
+    print_perm(A, foo_pretty_print);
 
     /** Output
     [
@@ -59,7 +59,7 @@ int main(void)
         }
     }
     /*...*/
-    perm_kill(&A);
+    perm_kill(A);
 }
 ```
 
@@ -91,6 +91,7 @@ Some examples of planned features::
 ### Behaviour
 
 - generate perms on the fly so that not as much RAM is not used up
+- ability to make all allocations static (no allocs at all)
 
 ## License
 
