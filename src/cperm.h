@@ -13,17 +13,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define   perm_group(P) ((P).group)
-#define   perm_width(P) ((P).width)
-#define  perm_height(P) ((P).height)
-#define perm_objsize(P) ((P).objsize)
+struct perm;
+/* TODO:: No allocs */
+#if defined(STATIC_PERMS)
+typedef size_t perm_buffer;
+#endif
 
-struct perm {
-    void*           group;
-    const uint64_t height;
-    const uint8_t   width;
-    const size_t  objsize;
-};
 
 /***
  """
@@ -44,12 +39,12 @@ struct perm {
  * over [3,2,1]. Whereas for combinations([3,4,2,1], 4, 3) [3,2,1]
  * would be shown.
  *--------------------------------------------------------------------*/
-struct perm combinations(void* collection, uint8_t n, uint8_t k, size_t size);
+struct perm *combinations(void* collection, uint8_t n, uint8_t k, size_t size);
 
 /*---------------------------------------------------------
  * Returns all possible rearrangemenents of the collection
  *-------------------------------------------------------*/
-struct perm permutations(void* collection, uint8_t n, uint8_t k, size_t size);
+struct perm *permutations(void* collection, uint8_t n, uint8_t k, size_t size);
 
 /*----------------------------------
  * free the allocated 2D perm array
@@ -59,6 +54,26 @@ void perm_kill(struct perm*);
 /* ======================================================
    utility functions
 ====================================================== */
+
+/*---------------------------- 
+ * return the 2D perm array 
+ *--------------------------*/
+void *perm_group(struct perm *P);
+
+/*---------------------------- 
+ * return the width of the perm
+ *--------------------------*/
+uint8_t perm_width(struct perm *P);
+
+/*---------------------------------
+ * return the height of the perm
+ *-------------------------------*/
+size_t perm_height(struct perm *P);
+
+/*------------------------------------------------
+ * return the size(s) of the permuted object(s)
+ *----------------------------------------------*/
+size_t perm_size(struct perm *P);
 
 /*--------------------------------------------------------------
  * print all arrangements with a pretty printer for the objects

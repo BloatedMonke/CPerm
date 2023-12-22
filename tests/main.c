@@ -37,8 +37,8 @@ typedef unsigned int  uint;
 #define MAX_TYPE_NAME_LEN 10
 #define STRUCT_IDENTIFIER "-"
 
-                /* source of truths */
-const char*             sots[MAX_TEST_FILE_COUNT] = {NULL};
+                           /* source of truths */
+const char*                sots[MAX_TEST_FILE_COUNT] = {NULL};
 char                 perm_funcs[MAX_TEST_FILE_COUNT] = {0};
 char types[MAX_TEST_FILE_COUNT][MAX_TYPE_NAME_LEN+2] = {{0}};
 
@@ -53,7 +53,7 @@ bool  int_assert_equals_msg(const int  observed, const int  expected, const char
 bool char_assert_equals_msg(const char observed, const char expected, const char *msg);
 
 const char *ordstem(uint x);
-static inline void pexit(uint l, uint k, const char* const s, struct perm* groups, uint i);
+static inline void pexit(uint l, uint k, const char* const s, struct perm* groups[MAX_TEST_FILE_COUNT], uint i);
 void  int_pretty_fprint(FILE *file, void *xp){ fprintf(file, "%d", *(int *)xp); }
 void char_pretty_fprint(FILE *file, void *xp){ fprintf(file, "%c", *(char*)xp); }
 
@@ -98,6 +98,15 @@ int main(int argc, const char *argv[])
 
     for (uint i = 0; i < len; ++i)
         fclose(files[i]);
+
+    if (OPT_LEVEL == 3) {
+        printf("::all tests passed:: files tested at all optimisation levels\n\n");
+        printf("summary of files tested:\n");
+        for (uint i = 0; i < len; ++i) {
+            printf("%s", sots[i]);
+            printf("\t\tn=%d  k=%d  type=%s\n", Ns[i], Ks[i], types[i]);
+        }
+    }
 
     return 0;
 }
@@ -155,15 +164,6 @@ void parse(void)
     }
 }
 
-struct internal_perm {
-    void*     group;
-    uint64_t height;
-    uint8_t   width;
-    size_t  objsize;
-};
-typedef struct internal_perm
-INTERNAL_PERM_T;
-
 struct anon {
     char pad;
     byte data[];
@@ -173,7 +173,7 @@ INTERNAL_ANON_T;
 
 void run_test(void)
 {
-    INTERNAL_PERM_T groups[MAX_TEST_FILE_COUNT] = {{.group = NULL}};    
+    struct perm *groups[MAX_TEST_FILE_COUNT] = {NULL};    
 
     for (uint i = 0; i < len; ++i) {
         /** Grab the array */
@@ -198,23 +198,17 @@ void run_test(void)
         }
 
         if (perm_funcs[i] == 'P'){
-            struct perm touch = permutations(arr, Ns[i], Ks[i], sizes[i]);
-            groups[i] = *(INTERNAL_PERM_T *)&touch;
+            groups[i] = permutations(arr, Ns[i], Ks[i], sizes[i]);
         }
         if (perm_funcs[i] == 'C'){
-            struct perm touch = combinations(arr, Ns[i], Ks[i], sizes[i]);
-            groups[i] = *(INTERNAL_PERM_T *)&touch;
+            groups[i] = combinations(arr, Ns[i], Ks[i], sizes[i]);
         }
-
-        /* format */
-        if (i > 0) puts("");
-        printf("\t\t%s\tn = %d  k = %d\n\n", s, Ns[i], Ks[i]);
 
         /** Run the asserts */
         
         /** Eat the lines */
         fgetc(files[i]); fgetc(files[i]);
-        for (uint l = 0; l < groups[i].height; ++l) {
+        for (uint l = 0; l < perm_height(groups[i]); ++l) {
             j = k = 0;
             fgets(s, 3*Ks[i] - 1, files[i]);
             fgetc(files[i]);
@@ -226,41 +220,40 @@ void run_test(void)
                 }
                 if (strcmp(types[i], "int") == 0) {
                     num = atoi(s + j);
-                    int *iarr = groups[i].group;
+                    int *iarr = perm_group(groups[i]);
                     if (iarr == NULL && Ks[i] != 0)
-                        pexit(l, k, s, (struct perm *)groups, i);
+                        pexit(l, k, s, groups, i);
                     if (iarr != NULL)
                     /* add msg when the asserts take fmts */
                     if (!int_assert_equals_msg(iarr[l * Ks[i] + k], num, "")) {
-                        pexit(l, k, s, (struct perm *)groups, i);
+                        pexit(l, k, s, groups, i);
                     }
                 }
                 if (strcmp(types[i], "char") == 0) {
-                    char *carr = groups[i].group;
+                    char *carr = perm_group(groups[i]);
                     if (carr == NULL && Ks[i] != 0)
-                        pexit(l, k, s, (struct perm *)groups, i);
+                        pexit(l, k, s, groups, i);
                     if (carr != NULL)
                     /* add msg when the asserts take fmts */
                     if (!char_assert_equals_msg(carr[l * Ks[i] + k], s[j], "")) {
-                        pexit(l, k, s, (struct perm *)groups, i);
+                        pexit(l, k, s, groups, i);
                     }
                 }
                 ++j, ++k;
             }
         }
-        printf("::all equal::\n");
-        perm_kill((struct perm *)&groups[i]);
+        perm_kill(groups[i]);
     }
 }
 
 static inline void
-pexit(uint l, uint k, const char* const s, struct perm* groups, uint i)
+pexit(uint l, uint k, const char* const s, struct perm* groups[MAX_TEST_FILE_COUNT], uint i)
 {
     fprintf(stderr, RED"::FAILURE::%s"RESET PURPLE" %d%s Line, %d%s Row, %d%s Column:\nExpected [%s] but observed "RESET, sots[i], l+3, ordstem(l+3), l+1, ordstem(l+1), k+1, ordstem(k+1), s);
     
     /* TODO:: use ncurses so that only the k'th symbol gets underlined*/
     fprintf(stderr, RED_UNDERLINE);
-    perm_fprint(stderr, (groups+i), l, char_pretty_fprint);
+    perm_fprint(stderr, groups[i], l, char_pretty_fprint);
     fprintf(stderr, RESET);
     exit(0xff);
 }
