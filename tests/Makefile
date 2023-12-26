@@ -37,8 +37,14 @@ test: all
 	./debugO0 $(STD_FILES)
 	./debugO1 $(STD_FILES)
 	./debugO2 $(STD_FILES)
-	./debugO3 $(STD_FILES) \
-	>> test_results.txt
+	./debugO3 $(STD_FILES)
+	@printf "::all tests passed:: lib tested at all optimisation levels\n\n" >> test_results.txt
+	@printf "summary of files tested:\n" >> test_results.txt
+	@for file in $(STD_FILES); \
+	do \
+	printf "%s\n" $${file} >> test_results.txt; \
+	done;
+	@unset file
 	@lines=$$(wc -l test_results.txt | awk '{print $$1}'); \
 	if [ $$lines -gt 20 ]; \
 	then \
@@ -46,7 +52,8 @@ test: all
 	else \
 	  echo ""; \
 	  cat test_results.txt; \
-	fi
+	fi; \
+	unset lines;
 
 cpermO0.o: cperm.c $(HEADERS)
 	$(CC) $(CFLAGS) -O0 -o $@ -c $<
@@ -58,10 +65,10 @@ cpermO3.o: cperm.c $(HEADERS)
 	$(CC) $(CFLAGS) -O3 -o $@ -c $<
 
 mainO0.o: main.c $(HEADERS)
-	$(CC) $(CFLAGS) $(AD_FLAG) -DOPT_LEVEL=0 -O0 -o $@ -c $<
+	$(CC) $(CFLAGS) $(AD_FLAG) -O0 -o $@ -c $<
 mainO1.o: main.c $(HEADERS)
-	$(CC) $(CFLAGS) $(AD_FLAG) -DOPT_LEVEL=1 -O1 -o $@ -c $<
+	$(CC) $(CFLAGS) $(AD_FLAG) -O1 -o $@ -c $<
 mainO2.o: main.c $(HEADERS)
-	$(CC) $(CFLAGS) $(AD_FLAG) -DOPT_LEVEL=2 -O2 -o $@ -c $<
+	$(CC) $(CFLAGS) $(AD_FLAG) -O2 -o $@ -c $<
 mainO3.o: main.c $(HEADERS)
-	$(CC) $(CFLAGS) $(AD_FLAG) -DOPT_LEVEL=3 -O3 -o $@ -c $<
+	$(CC) $(CFLAGS) $(AD_FLAG) -O3 -o $@ -c $<

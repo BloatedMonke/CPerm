@@ -48,12 +48,13 @@ size_t sizes[MAX_TEST_FILE_COUNT] = {0};
 uint len = 0;
 
 FILE *files[MAX_TEST_FILE_COUNT] = {NULL};
+struct perm *groups[MAX_TEST_FILE_COUNT] = {NULL};
 
 bool  int_assert_equals_msg(const int  observed, const int  expected, const char *msg);
 bool char_assert_equals_msg(const char observed, const char expected, const char *msg);
 
 const char *ordstem(uint x);
-static inline void pexit(uint l, uint k, const char* const s, struct perm* groups[MAX_TEST_FILE_COUNT], uint i);
+static inline void pexit(uint l, uint k, const char* const s, uint i);
 void  int_pretty_fprint(FILE *file, void *xp){ fprintf(file, "%d", *(int *)xp); }
 void char_pretty_fprint(FILE *file, void *xp){ fprintf(file, "%c", *(char*)xp); }
 
@@ -67,7 +68,7 @@ int main(int argc, const char *argv[])
         fprintf(stderr, "        Current Max number of tester files: %d\n", MAX_TEST_FILE_COUNT);
         fprintf(stderr, "        You passed in %d\n", argc - 1);
         fprintf(stderr, "        To change this pass MAX_TEST_FILE_COUNT=N to make as an argument:\n"
-                        "        \t\tmake test MAX_TEST_FILE_COUNT=N\n");
+                        "        \t\tmake all MAX_TEST_FILE_COUNT=N\n");
         fprintf(stderr, "        Where N is the new max\n");
         return 1;
     }
@@ -99,14 +100,7 @@ int main(int argc, const char *argv[])
     for (uint i = 0; i < len; ++i)
         fclose(files[i]);
 
-    if (OPT_LEVEL == 3) {
-        printf("::all tests passed:: files tested at all optimisation levels\n\n");
-        printf("summary of files tested:\n");
-        for (uint i = 0; i < len; ++i) {
-            printf("%s", sots[i]);
-            printf("\t\tn=%d  k=%d  type=%s\n", Ns[i], Ks[i], types[i]);
-        }
-    }
+    printf("::all tests passed::\n");
 
     return 0;
 }
@@ -173,8 +167,6 @@ INTERNAL_ANON_T;
 
 void run_test(void)
 {
-    struct perm *groups[MAX_TEST_FILE_COUNT] = {NULL};    
-
     for (uint i = 0; i < len; ++i) {
         /** Grab the array */
         char s[3*Ns[i] - 1];
@@ -222,21 +214,21 @@ void run_test(void)
                     num = atoi(s + j);
                     int *iarr = perm_group(groups[i]);
                     if (iarr == NULL && Ks[i] != 0)
-                        pexit(l, k, s, groups, i);
+                        pexit(l, k, s, i);
                     if (iarr != NULL)
                     /* add msg when the asserts take fmts */
                     if (!int_assert_equals_msg(iarr[l * Ks[i] + k], num, "")) {
-                        pexit(l, k, s, groups, i);
+                        pexit(l, k, s, i);
                     }
                 }
                 if (strcmp(types[i], "char") == 0) {
                     char *carr = perm_group(groups[i]);
                     if (carr == NULL && Ks[i] != 0)
-                        pexit(l, k, s, groups, i);
+                        pexit(l, k, s, i);
                     if (carr != NULL)
                     /* add msg when the asserts take fmts */
                     if (!char_assert_equals_msg(carr[l * Ks[i] + k], s[j], "")) {
-                        pexit(l, k, s, groups, i);
+                        pexit(l, k, s, i);
                     }
                 }
                 ++j, ++k;
@@ -247,7 +239,7 @@ void run_test(void)
 }
 
 static inline void
-pexit(uint l, uint k, const char* const s, struct perm* groups[MAX_TEST_FILE_COUNT], uint i)
+pexit(uint l, uint k, const char* const s, uint i)
 {
     fprintf(stderr, RED"::FAILURE::%s"RESET PURPLE" %d%s Line, %d%s Row, %d%s Column:\nExpected [%s] but observed "RESET, sots[i], l+3, ordstem(l+3), l+1, ordstem(l+1), k+1, ordstem(k+1), s);
     
