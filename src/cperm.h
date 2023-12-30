@@ -26,7 +26,7 @@ typedef size_t perm_buffer;
     of size (width * objsize) * (height) = (k * objsize) * P(n, k)
     where P denotes the standard combinatorics function for each
     rearrangement function listed.
-     These must be freed by the caller using perm_kill(&P).
+     These must be freed by the caller using perm_kill(P).
  """
  **/
 
