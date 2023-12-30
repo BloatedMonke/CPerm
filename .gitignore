@@ -13,5 +13,5 @@
 debug*
 dbg*
 
-# test results
-test_results.txt
+# test log
+test_results.log
