@@ -126,23 +126,27 @@ void parse(void)
     for (uint i = 0; i < len; ++i) {
         const char * const s = sots[i];
         
+        /* get the position of the actual filename */
+        int last = 0;
+        for (int j = 0; s[j]; ++j) last = s[j] == '/' ? j+1: last;
+
         /* Grab the func */
-        perm_funcs[i] = s[0];
+        perm_funcs[i] = s[last];
         
         /* Grab n */
-        Ns[i] = s[1] - '0';
+        Ns[i] = s[last+1] - '0';
         
         /* Grab k */
-        Ks[i] = s[2] - '0';
+        Ks[i] = s[last+2] - '0';
 
         /* Now grab the type */
-        if (!strchr(s+3, '.')) {
+        if (!strchr(s+last+3, '.')) {
             printf("add a file extension (.txt will do) to %s i.e arg %d\n", s, i+1);
             exit(6);
         }
         
         for (int j = 0; j < MAX_TYPE_NAME_LEN && s[j+3] != '.'; ++j)
-            types[i][j] = s[j+3];
+            types[i][j] = s[j+last+3];
         types[i][MAX_TYPE_NAME_LEN] = '\0';
 
         if (strcmp(types[i], "int") == 0) {
@@ -195,11 +199,17 @@ void run_test(void)
         if (perm_funcs[i] == 'C'){
             groups[i] = combinations(arr, Ns[i], Ks[i], sizes[i]);
         }
-
+        /** Something went terribly wrong */
+        if (groups[i] == NULL) {
+            fprintf(stderr, RED"ERROR:: NULL perm pointer"RESET " - most likely allocated a size of 0\n");
+            fprintf(stderr, "          K: %u size: %zu\n", Ks[i], sizes[i]);
+            exit(0xfe);
+        }
         /** Run the asserts */
         
         /** Eat the lines */
         fgetc(files[i]); fgetc(files[i]);
+        
         for (uint l = 0; l < perm_height(groups[i]); ++l) {
             j = k = 0;
             fgets(s, 3*Ks[i] - 1, files[i]);

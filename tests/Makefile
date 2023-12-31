@@ -7,8 +7,11 @@ HEADERS   := cperm.h combinatorics.h
 INCLUDES  := ${VPATH:%=-I%}
 WARNINGS  := -Wall -Wpedantic -Wextra -Werror -std=c99
 DB_FLAGS  := -g3 -fsanitize=address
-STD_FILES := P44char.txt P44int.txt P43int.txt P42int.txt P41int.txt P40int.txt \
-            C44int.txt C43int.txt C42char.txt C40int.txt 
+DATA_DIR  := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))DATA
+STD_FILEN := P44char P44int P43int P42int P41int P40int \
+             C44int C43int C42char C40int 
+STD_FILES := ${STD_FILEN:%=$(DATA_DIR)/%.dat}
+OPTLEVELS := $(shell seq 0 3)
 MAX_TEST_FILE_COUNT := $(words $(STD_FILES))
 
 .DEFAULT_GOAL = all
@@ -26,7 +29,7 @@ cpermO$(1).o: cperm.c $(HEADERS)
 	$(CC) $(CFLAGS) -O$(1) -o $$@ -c $$<
 endef
 
-$(foreach optlvl, $(shell seq 0 3), $(eval $(call TEMPLATE,$(optlvl))))
+$(foreach optlvl, $(OPTLEVELS), $(eval $(call TEMPLATE,$(optlvl))))
 
 clean:
 	rm *.o
@@ -34,27 +37,25 @@ test_clean:
 	rm *.o
 	rm debug*
 	rm test_results.log
-all: $(addprefix debugO, $(shell seq 0 3))
+all: $(addprefix debugO, $(OPTLEVELS))
 
 test: all
 	> test_results.log
-	./debugO0 $(STD_FILES)
-	./debugO1 $(STD_FILES)
-	./debugO2 $(STD_FILES)
-	./debugO3 $(STD_FILES)
+	@set -e; \
+	for i in $(OPTLEVELS); do \
+	  printf "(%d): " $${i}; \
+	  ./debugO$${i} $(STD_FILES); \
+	done;
 	@printf "::all tests passed:: lib tested at all optimisation levels\n\n" >> test_results.log
 	@printf "summary of files tested:\n" >> test_results.log
-	@for file in $(STD_FILES); \
-	do printf "%s\n" $${file} >> test_results.log; \
-	done;
-	@unset file
+	@for file in $(STD_FILES); do \
+	  printf "%s\n" $${file##*/} >> test_results.log; \
+	done; 
 	@lines=$$(wc -l test_results.log | awk '{print $$1}'); \
-	if [ $$lines -gt 20 ]; \
-	then \
+	if [ $$lines -gt 20 ]; then \
 	  less test_results.log; \
 	else \
 	  echo ""; \
 	  cat test_results.log; \
 	fi; \
-	unset lines;
 
